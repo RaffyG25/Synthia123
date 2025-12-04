@@ -13,19 +13,22 @@ import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import MeetingHistory from './pages/MeetingHistory';
 import MeetingSummaryDetail from './pages/MeetingSummaryDetail';
+import Space from './pages/Space';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   // Meeting Room has its own layout (no sidebar/header)
   // Workspace has its own sidebar structure
+  // Space has its own sidebar structure
   const isMeetingRoom = location.pathname === '/meeting-room';
   const isWorkspace = location.pathname.startsWith('/workspace');
+  const isSpace = location.pathname.startsWith('/space');
 
   if (isMeetingRoom) {
     return <>{children}</>;
   }
 
-  if (isWorkspace) {
+  if (isWorkspace || isSpace) {
     return <>{children}</>;
   }
 
@@ -79,6 +82,7 @@ const App: React.FC = () => {
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/collaboration" element={<Collaboration />} />
           <Route path="/workspace" element={<Workspace />} />
+          <Route path="/space" element={<Space />} />
           <Route path="/meeting-room" element={<MeetingRoom />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/profile" element={<Profile />} />

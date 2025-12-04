@@ -20,8 +20,20 @@ const Workspace: React.FC = () => {
           </div>
         </div>
 
+      
+
         <div className="p-3 flex-1 overflow-y-auto">
-          <div className="mb-6">
+          <div 
+            onClick={() => navigate('/space')}
+            className="flex items-center space-x-2 px-4 py-1.5 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors pb-2"
+          >
+            <svg className="w-4 h-4 text-gray-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span className="text-sm font-medium text-gray-800 dark:text-slate-200">Space</span>
+          </div>
+
+          <div className="mb-6 pt-4">
             <div className="flex items-center justify-between px-2 mb-2">
               <span className="text-xs font-semibold text-gray-500 uppercase">Channels</span>
               <Plus className="w-4 h-4 text-gray-500 cursor-pointer hover:text-gray-700" />
