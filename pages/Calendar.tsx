@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   ChevronLeft, ChevronRight, Plus, 
   Calendar as CalendarIcon, Clock, MapPin, Video, 
@@ -20,6 +21,7 @@ interface Event {
 }
 
 const Calendar: React.FC = () => {
+  const navigate = useNavigate();
   const [view, setView] = useState<'week' | 'month' | 'day'>('month');
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showNewEventModal, setShowNewEventModal] = useState(false);
@@ -350,7 +352,12 @@ const Calendar: React.FC = () => {
                              <div className="flex items-start gap-3 text-sm">
                                 <Video className="w-5 h-5 text-violet-600 mt-0.5" />
                                 <div>
-                                    <a href="#" className="font-bold text-violet-600 hover:text-violet-700 hover:underline">Join via SYNTHIA</a>
+                                    <button 
+                                      onClick={() => navigate('/video')}
+                                      className="font-bold text-violet-600 hover:text-violet-700 hover:underline transition-colors"
+                                    >
+                                      Join via SYNTHIA
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -391,7 +398,10 @@ const Calendar: React.FC = () => {
                         Edit Event
                     </button>
                     {selectedEvent.type === 'team' && (
-                         <button className="flex-1 sm:flex-none bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-violet-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-violet-200 dark:shadow-none">
+                         <button 
+                           onClick={() => navigate('/video')}
+                           className="flex-1 sm:flex-none bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-violet-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-violet-200 dark:shadow-none"
+                         >
                              <Video className="w-4 h-4" /> Join via SYNTHIA
                          </button>
                     )}
