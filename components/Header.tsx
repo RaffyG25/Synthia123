@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Search, Moon, Sun, Plus } from 'lucide-react';
 
@@ -17,6 +18,10 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     }
   };
 
+  const handleNewEvent = () => {
+    window.dispatchEvent(new Event('open-new-event-modal'));
+  };
+
   return (
     <header className="flex-shrink-0 bg-white p-4 h-[60px] border-b border-gray-200 flex items-center justify-between dark:bg-slate-800 dark:border-slate-700 transition-colors duration-300">
       <h1 className="text-sm font-semibold text-gray-600 uppercase tracking-wide dark:text-slate-400">{title}</h1>
@@ -31,7 +36,10 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         </div>
 
         {title === 'Calendar' && (
-           <button className="px-4 py-2 bg-violet-600 text-white font-medium rounded-lg hover:bg-violet-700 text-sm flex items-center gap-2 transition-colors shadow-md shadow-violet-200 dark:shadow-none">
+           <button 
+             onClick={handleNewEvent}
+             className="px-4 py-2 bg-violet-600 text-white font-medium rounded-lg hover:bg-violet-700 text-sm flex items-center gap-2 transition-colors shadow-md shadow-violet-200 dark:shadow-none"
+           >
              <Plus className="w-4 h-4" />
              <span className="hidden sm:inline">New Event</span>
            </button>

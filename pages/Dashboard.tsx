@@ -1,29 +1,88 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckSquare, Users, Video, ArrowRight } from 'lucide-react';
+import { CheckSquare, Users, Video, ArrowRight, X } from 'lucide-react';
+
+interface Task {
+  id: number;
+  title: string;
+  status: string;
+  workspace: string;
+  dueDate: string;
+  priority: string;
+  description: string;
+}
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [showBriefing, setShowBriefing] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
+  const tasks: Task[] = [
+    {
+      id: 1,
+      title: "UI Design",
+      status: "In Progress",
+      workspace: "Capstone 101",
+      dueDate: "11/20/2025",
+      priority: "High Priority",
+      description: "Draft the initial wireframes for the new dashboard layout, focusing on the widget grid system and responsive behavior for mobile devices. Incorporate the new Violet brand color scheme."
+    },
+    {
+      id: 2,
+      title: "Database Schema",
+      status: "Completed",
+      workspace: "Capstone 101",
+      dueDate: "11/15/2025",
+      priority: "High Priority",
+      description: "Analyze requirements for the new 'Projects' feature and update the ERD. Create migration scripts to add the 'workspaces' table and establish foreign key constraints."
+    },
+    {
+      id: 3,
+      title: "API Integration",
+      status: "Pending",
+      workspace: "Internal Tools",
+      dueDate: "11/25/2025",
+      priority: "Medium",
+      description: "Integrate the third-party calendar API to sync user events. Implement OAuth2 authentication flow and handle token refreshing mechanism."
+    }
+  ];
 
   // Lock body scroll when modal is open
   useEffect(() => {
-    if (showBriefing) {
+    if (showBriefing || selectedTask) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => { document.body.style.overflow = 'unset'; };
-  }, [showBriefing]);
+  }, [showBriefing, selectedTask]);
 
   // Close on Escape key
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setShowBriefing(false);
+      if (e.key === 'Escape') {
+        setShowBriefing(false);
+        setSelectedTask(null);
+      }
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'In Progress': return 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300';
+      case 'Completed': return 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-300';
+      case 'Pending': return 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300';
+      default: return 'bg-gray-100 text-gray-600';
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    if (priority.includes('High')) return 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300';
+    if (priority.includes('Medium')) return 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300';
+    return 'bg-gray-100 text-gray-600';
+  };
 
   return (
     <div className="p-6 md:p-8 bg-gray-100 dark:bg-slate-900 min-h-full">
@@ -90,7 +149,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Task List */}
+          {/* Task List Overview */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 dark:bg-slate-800 dark:border-slate-700">
             <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-slate-700">
               <h3 className="text-lg font-bold text-gray-800 dark:text-white">Task List Overview</h3>
@@ -99,29 +158,41 @@ const Dashboard: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200 dark:bg-slate-700/50 dark:border-slate-700">
-                    <th className="px-6 py-3 text-left font-semibold text-gray-700 dark:text-slate-300 uppercase text-xs tracking-wider">Task Name</th>
-                    <th className="px-6 py-3 text-left font-semibold text-gray-700 dark:text-slate-300 uppercase text-xs tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left font-semibold text-gray-700 dark:text-slate-300 uppercase text-xs tracking-wider">Workspace</th>
-                    <th className="px-6 py-3 text-left font-semibold text-gray-700 dark:text-slate-300 uppercase text-xs tracking-wider">Due Date</th>
-                    <th className="px-6 py-3 text-left font-semibold text-gray-700 dark:text-slate-300 uppercase text-xs tracking-wider">Priority</th>
+                  <tr className="border-b border-gray-200 dark:border-slate-700">
+                    <th className="px-6 py-4 text-left font-semibold text-gray-500 dark:text-slate-400 uppercase text-xs tracking-wider">Task Name</th>
+                    <th className="px-6 py-4 text-left font-semibold text-gray-500 dark:text-slate-400 uppercase text-xs tracking-wider">Status</th>
+                    <th className="px-6 py-4 text-left font-semibold text-gray-500 dark:text-slate-400 uppercase text-xs tracking-wider">Workspace</th>
+                    <th className="px-6 py-4 text-left font-semibold text-gray-500 dark:text-slate-400 uppercase text-xs tracking-wider">Due Date</th>
+                    <th className="px-6 py-4 text-left font-semibold text-gray-500 dark:text-slate-400 uppercase text-xs tracking-wider">Priority</th>
+                    <th className="px-6 py-4 text-left font-semibold text-gray-500 dark:text-slate-400 uppercase text-xs tracking-wider">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
-                  <tr className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
-                    <td className="px-6 py-4 text-gray-800 font-medium dark:text-white">UI Design</td>
-                    <td className="px-6 py-4"><span className="px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-full text-xs font-semibold dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">In Progress</span></td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-slate-400">Capstone 101</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-slate-400">11/20/2025</td>
-                    <td className="px-6 py-4"><span className="px-2.5 py-1 bg-red-50 text-red-600 border border-red-100 rounded-full text-xs font-semibold dark:bg-red-900/30 dark:text-red-300 dark:border-red-800">High</span></td>
-                  </tr>
-                  <tr className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
-                    <td className="px-6 py-4 text-gray-800 font-medium dark:text-white">Database Schema</td>
-                    <td className="px-6 py-4"><span className="px-2.5 py-1 bg-green-50 text-green-600 border border-green-100 rounded-full text-xs font-semibold dark:bg-green-900/30 dark:text-green-300 dark:border-green-800">Completed</span></td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-slate-400">Capstone 101</td>
-                    <td className="px-6 py-4 text-gray-600 dark:text-slate-400">11/15/2025</td>
-                    <td className="px-6 py-4"><span className="px-2.5 py-1 bg-red-50 text-red-600 border border-red-100 rounded-full text-xs font-semibold dark:bg-red-900/30 dark:text-red-300 dark:border-red-800">High</span></td>
-                  </tr>
+                  {tasks.map((task) => (
+                    <tr key={task.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
+                      <td className="px-6 py-4 text-gray-800 font-medium dark:text-white">{task.title}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(task.status)}`}>
+                          {task.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600 dark:text-slate-400">{task.workspace}</td>
+                      <td className="px-6 py-4 text-gray-600 dark:text-slate-400">{task.dueDate}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPriorityColor(task.priority)}`}>
+                          {task.priority}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <button 
+                          onClick={() => setSelectedTask(task)}
+                          className="px-4 py-1.5 bg-violet-600 text-white text-xs font-medium rounded-md hover:bg-violet-700 transition-colors shadow-sm"
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -133,35 +204,45 @@ const Dashboard: React.FC = () => {
           {/* Calendar Widget */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 dark:bg-slate-800 dark:border-slate-700">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-base font-bold text-gray-800 dark:text-white">November</h3>
-              <div className="flex gap-2">
-                <button className="p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 dark:hover:bg-slate-700 dark:text-slate-500">←</button>
-                <button className="p-1 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 dark:hover:bg-slate-700 dark:text-slate-500">→</button>
-              </div>
+              <button className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full text-gray-400 hover:text-gray-600 dark:text-slate-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+              <h3 className="text-base font-bold text-gray-800 dark:text-white">December 2025</h3>
+              <button className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full text-gray-400 hover:text-gray-600 dark:text-slate-400 transition-colors">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
             </div>
             
-            <div className="grid grid-cols-7 gap-y-4 text-center text-xs">
+            <div className="grid grid-cols-7 text-center mb-4">
               {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-                <div key={d} className="font-semibold text-gray-400 py-1">{d}</div>
+                <div key={d} className="text-xs font-medium text-gray-400 dark:text-slate-500 py-1">{d}</div>
               ))}
-              {/* Simplified logic for display */}
-              <div className="py-2 text-gray-300 dark:text-slate-600">26</div>
-              <div className="py-2 text-gray-300 dark:text-slate-600">27</div>
-              <div className="py-2 text-gray-300 dark:text-slate-600">28</div>
-              <div className="py-2 text-gray-300 dark:text-slate-600">29</div>
+            </div>
+
+            <div className="grid grid-cols-7 gap-y-4 gap-x-2 text-center text-sm">
+              {/* Prev Month */}
               <div className="py-2 text-gray-300 dark:text-slate-600">30</div>
-              <div className="py-2 text-gray-300 dark:text-slate-600">31</div>
-              <div className="py-2 text-gray-700 dark:text-slate-300">1</div>
-              <div className="py-2 text-gray-700 dark:text-slate-300">2</div>
-              {/* ... filler dates ... */}
-              <div className="py-2 text-gray-700 dark:text-slate-300">15</div>
-              <div className="py-2 text-gray-700 dark:text-slate-300">16</div>
-              <div className="py-2 text-gray-700 dark:text-slate-300">17</div>
-              <div className="relative flex items-center justify-center">
-                <div className="w-8 h-8 bg-violet-600 text-white rounded-full flex items-center justify-center shadow-md font-semibold">18</div>
+              
+              {/* Days 1-3 */}
+              <div className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg">1</div>
+              <div className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg">2</div>
+              <div className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg">3</div>
+              
+              {/* Selected Day 4 */}
+              <div className="relative">
+                  <div className="absolute inset-0 bg-violet-600 rounded-lg shadow-sm shadow-violet-200 dark:shadow-none"></div>
+                  <div className="relative py-2 text-white font-bold cursor-pointer">4</div>
               </div>
-              <div className="py-2 text-gray-700 dark:text-slate-300">19</div>
-              {/* ... */}
+
+              {/* Days 5-31 */}
+              {[...Array(27)].map((_, i) => (
+                 <div key={i + 5} className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg">{i + 5}</div>
+              ))}
+              
+              {/* Next Month */}
+              <div className="py-2 text-gray-300 dark:text-slate-600">1</div>
+              <div className="py-2 text-gray-300 dark:text-slate-600">2</div>
+              <div className="py-2 text-gray-300 dark:text-slate-600">3</div>
             </div>
           </div>
 
@@ -220,9 +301,7 @@ const Dashboard: React.FC = () => {
                             onClick={() => setShowBriefing(false)}
                         >
                             <span className="sr-only">Close</span>
-                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            <X className="h-6 w-6" />
                         </button>
                     </div>
 
@@ -305,6 +384,73 @@ const Dashboard: React.FC = () => {
                         </div>
                     </div>
 
+                </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Task Detail Modal */}
+      {selectedTask && (
+        <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="task-modal-title" role="dialog" aria-modal="true">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm"
+            onClick={() => setSelectedTask(null)}
+          ></div>
+
+          <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 w-full max-w-lg dark:bg-slate-800 border border-transparent dark:border-slate-700">
+                
+                {/* Modal Header */}
+                <div className="bg-white p-6 border-b border-gray-100 dark:bg-slate-800 dark:border-slate-700 flex justify-between items-start">
+                    <div className="flex items-center gap-3">
+                        <span className="w-1.5 h-6 bg-violet-600 rounded-full flex-shrink-0"></span>
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight" id="task-modal-title">{selectedTask.title}</h2>
+                    </div>
+                    <button 
+                        onClick={() => setSelectedTask(null)}
+                        className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 space-y-6 bg-white dark:bg-slate-800">
+                    {/* Status, Priority, Due Date Grid */}
+                    <div className="grid grid-cols-3 gap-4">
+                        <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase mb-2 dark:text-slate-400">STATUS</p>
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(selectedTask.status)}`}>
+                                {selectedTask.status}
+                            </span>
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase mb-2 dark:text-slate-400">PRIORITY</p>
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(selectedTask.priority)}`}>
+                                {selectedTask.priority}
+                            </span>
+                        </div>
+                        <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase mb-2 dark:text-slate-400">DUE DATE</p>
+                            <p className="text-sm font-medium text-gray-800 dark:text-white">{selectedTask.dueDate}</p>
+                        </div>
+                    </div>
+
+                    {/* Workspace */}
+                    <div>
+                        <p className="text-xs font-semibold text-gray-500 uppercase mb-2 dark:text-slate-400">WORKSPACE</p>
+                        <p className="text-sm font-bold text-gray-800 dark:text-white">{selectedTask.workspace}</p>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                        <p className="text-xs font-semibold text-gray-500 uppercase mb-2 dark:text-slate-400">DESCRIPTION</p>
+                        <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg dark:bg-slate-700/50 dark:text-slate-300 leading-relaxed">
+                            {selectedTask.description}
+                        </div>
+                    </div>
                 </div>
             </div>
           </div>
