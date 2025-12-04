@@ -226,7 +226,7 @@ const Space: React.FC = () => {
                           onClick={() => handleOpenDiscussion(discussion)}
                           className="ml-auto px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                         >
-                          View Discussion
+                          View Summary
                         </button>
                       </div>
                     </div>
