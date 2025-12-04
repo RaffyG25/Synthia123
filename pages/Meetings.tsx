@@ -79,7 +79,7 @@ const Meetings: React.FC = () => {
                 <td className="py-4 px-4 text-gray-700 dark:text-slate-300">Feb 20, 2025</td>
                 <td className="py-4 px-4 text-gray-700 dark:text-slate-300">09:00 AM</td>
                 <td className="py-4 px-4">
-                  <button onClick={() => navigate('/meeting-room')} className="px-3 py-1 bg-violet-600 text-white text-xs rounded hover:bg-violet-700">Join</button>
+                  <button onClick={() => navigate('/video')} className="px-3 py-1 bg-violet-600 text-white text-xs rounded hover:bg-violet-700">Join</button>
                 </td>
               </tr>
               <tr className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
@@ -91,7 +91,7 @@ const Meetings: React.FC = () => {
                 <td className="py-4 px-4 text-gray-700 dark:text-slate-300">Feb 21, 2025</td>
                 <td className="py-4 px-4 text-gray-700 dark:text-slate-300">02:00 PM</td>
                 <td className="py-4 px-4">
-                  <button onClick={() => navigate('/meeting-room')} className="px-3 py-1 bg-violet-600 text-white text-xs rounded hover:bg-violet-700">Join</button>
+                  <button onClick={() => navigate('/video')} className="px-3 py-1 bg-violet-600 text-white text-xs rounded hover:bg-violet-700">Join</button>
                 </td>
               </tr>
             </tbody>

@@ -196,7 +196,7 @@ const MeetingRoom: React.FC = () => {
         {/* Right: Leave */}
         <div className="w-1/4 flex justify-end">
           <button
-            onClick={() => navigate('/calendar')}
+            onClick={() => navigate('/Meeting-History')}
             className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition-colors"
           >
             <LogOut className="w-4 h-4" />
