@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Bell, Calendar, Video, Users, CheckSquare, Settings, User } from 'lucide-react';
+import synthiaLogo from "@/assets/synthia-logo.png";
 
 const Sidebar: React.FC = () => {
   const navItems = [
@@ -15,7 +16,7 @@ const Sidebar: React.FC = () => {
   return (
     <aside className="w-64 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col dark:bg-slate-800 dark:border-slate-700 transition-colors duration-300">
       <div className="flex items-center space-x-2 p-4 h-[60px] border-b border-gray-200 dark:border-slate-700">
-        <div className="h-10 w-10 bg-violet-600 rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-md shadow-violet-200 dark:shadow-none">S</div>
+        <img src={synthiaLogo} alt="Synthia" className="h-12 w-12" />
         <span className="text-xl font-semibold text-gray-800 dark:text-white">Synthia</span>
       </div>
 
