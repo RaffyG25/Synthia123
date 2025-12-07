@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Search, Moon, Sun, Plus } from 'lucide-react';
 

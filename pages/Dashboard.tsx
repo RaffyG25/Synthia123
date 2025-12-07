@@ -16,6 +16,13 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [showBriefing, setShowBriefing] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date(2025, 11)); // December 2025
+
+  const handleDateClick = (day: number) => {
+    const selectedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+    const dateString = selectedDate.toISOString().split('T')[0];
+    navigate(`/calendar?date=${dateString}`);
+  };
 
   const tasks: Task[] = [
     {
@@ -224,19 +231,19 @@ const Dashboard: React.FC = () => {
               <div className="py-2 text-gray-300 dark:text-slate-600">30</div>
               
               {/* Days 1-3 */}
-              <div className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg">1</div>
-              <div className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg">2</div>
-              <div className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg">3</div>
+              <div onClick={() => handleDateClick(1)} className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">1</div>
+              <div onClick={() => handleDateClick(2)} className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">2</div>
+              <div onClick={() => handleDateClick(3)} className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">3</div>
               
               {/* Selected Day 4 */}
-              <div className="relative">
+              <div onClick={() => handleDateClick(4)} className="relative cursor-pointer">
                   <div className="absolute inset-0 bg-violet-600 rounded-lg shadow-sm shadow-violet-200 dark:shadow-none"></div>
-                  <div className="relative py-2 text-white font-bold cursor-pointer">4</div>
+                  <div className="relative py-2 text-white font-bold">4</div>
               </div>
 
               {/* Days 5-31 */}
               {[...Array(27)].map((_, i) => (
-                 <div key={i + 5} className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg">{i + 5}</div>
+                 <div key={i + 5} onClick={() => handleDateClick(i + 5)} className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">{i + 5}</div>
               ))}
               
               {/* Next Month */}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import Calendar from './pages/Calendar';
 import Meetings from './pages/Meetings';
@@ -18,16 +19,18 @@ import Video from './pages/Video';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
+  // Landing page has its own layout (no sidebar/header)
   // Meeting Room has its own layout (no sidebar/header)
   // Workspace has its own sidebar structure
   // Space has its own sidebar structure
   // Video has its own layout (no sidebar/header)
+  const isLanding = location.pathname === '/';
   const isMeetingRoom = location.pathname === '/meeting-room';
   const isWorkspace = location.pathname.startsWith('/workspace');
   const isSpace = location.pathname.startsWith('/space');
   const isVideo = location.pathname === '/video';
 
-  if (isMeetingRoom || isVideo) {
+  if (isLanding || isMeetingRoom || isVideo) {
     return <>{children}</>;
   }
 
@@ -79,7 +82,8 @@ const App: React.FC = () => {
     <HashRouter>
       <Layout>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/meetings" element={<Meetings />} />
           <Route path="/tasks" element={<Tasks />} />

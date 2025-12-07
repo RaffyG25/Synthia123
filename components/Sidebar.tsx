@@ -5,7 +5,7 @@ import synthiaLogo from "@/assets/synthia-logo.png";
 
 const Sidebar: React.FC = () => {
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Notification', path: '/notifications', icon: Bell },
     { name: 'Calendar', path: '/calendar', icon: Calendar },
     { name: 'Meeting', path: '/meetings', icon: Video },

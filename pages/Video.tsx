@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import synthiaLogo from "@/assets/synthia-logo.png";
 
 const Video: React.FC = () => {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ const Video: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [audioOption, setAudioOption] = useState('dont-use-audio');
   const [isJoining, setIsJoining] = useState(false);
+  const [backgroundBlurEnabled, setBackgroundBlurEnabled] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const micBarsRef = useRef<HTMLDivElement[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -143,7 +146,7 @@ const Video: React.FC = () => {
       {/* Header */}
       <header className="flex-shrink-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 h-16 flex items-center justify-between px-6 z-10">
         <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">S</div>
+          <img src={synthiaLogo} alt="Synthia" className="h-12 w-12" />
           <span className="text-xl font-bold text-gray-800 dark:text-white tracking-tight">Synthia</span>
         </div>
         <div className="flex items-center space-x-2">
@@ -202,6 +205,31 @@ const Video: React.FC = () => {
                 className="w-full h-full object-cover transform scale-x-[-1]"
               ></video>
 
+              {/* Background Blur Overlay */}
+              {backgroundBlurEnabled && !isCameraOff && !isLoading && !showPermissionDenied && (
+                <>
+                  {/* Blur effect layer */}
+                  <div className="absolute inset-0 pointer-events-none" style={{
+                    filter: 'blur(15px)',
+                    zIndex: 5
+                  }}>
+                    <video
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-full object-cover transform scale-x-[-1]"
+                    >
+                      <source src="" />
+                    </video>
+                  </div>
+                  {/* Spotlight mask - sharp center, blurred edges */}
+                  <div className="absolute inset-0 pointer-events-none" style={{
+                    background: 'radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.5) 100%)',
+                    zIndex: 6
+                  }}></div>
+                </>
+              )}
+
               {/* Camera Off State */}
               {isCameraOff && !isLoading && !showPermissionDenied && (
                 <div className="absolute inset-0 bg-gray-100 dark:bg-slate-800 flex flex-col items-center justify-center z-10">
@@ -214,35 +242,44 @@ const Video: React.FC = () => {
                 </div>
               )}
 
-              {/* Mic Visualizer */}
+              {/* Mic Visualizer - Always visible */}
               {!isLoading && !showPermissionDenied && (
-                <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-lg flex items-center space-x-1.5" title="Mic Level">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-lg flex items-center space-x-1.5 z-20" title="Mic Level">
+                  <svg className={`w-4 h-4 ${isMicMuted ? 'text-red-400' : 'text-green-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {isMicMuted ? (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                    ) : (
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                    )}
                   </svg>
-                  <div className="flex items-end space-x-0.5 h-4">
-                    <div
-                      ref={(el) => {
-                        if (el) micBarsRef.current[0] = el;
-                      }}
-                      className="mic-bar w-1 bg-green-400 rounded-full h-1"
-                      style={{ height: '4px' }}
-                    ></div>
-                    <div
-                      ref={(el) => {
-                        if (el) micBarsRef.current[1] = el;
-                      }}
-                      className="mic-bar w-1 bg-green-400 rounded-full h-1.5"
-                      style={{ height: '6px' }}
-                    ></div>
-                    <div
-                      ref={(el) => {
-                        if (el) micBarsRef.current[2] = el;
-                      }}
-                      className="mic-bar w-1 bg-green-400 rounded-full h-1"
-                      style={{ height: '4px' }}
-                    ></div>
-                  </div>
+                  {!isMicMuted && (
+                    <div className="flex items-end space-x-0.5 h-4">
+                      <div
+                        ref={(el) => {
+                          if (el) micBarsRef.current[0] = el;
+                        }}
+                        className="mic-bar w-1 bg-green-400 rounded-full h-1"
+                        style={{ height: '4px' }}
+                      ></div>
+                      <div
+                        ref={(el) => {
+                          if (el) micBarsRef.current[1] = el;
+                        }}
+                        className="mic-bar w-1 bg-green-400 rounded-full h-1.5"
+                        style={{ height: '6px' }}
+                      ></div>
+                      <div
+                        ref={(el) => {
+                          if (el) micBarsRef.current[2] = el;
+                        }}
+                        className="mic-bar w-1 bg-green-400 rounded-full h-1"
+                        style={{ height: '4px' }}
+                      ></div>
+                    </div>
+                  )}
+                  {isMicMuted && (
+                    <span className="text-xs font-medium text-red-400">Muted</span>
+                  )}
                 </div>
               )}
             </div>
@@ -304,16 +341,27 @@ const Video: React.FC = () => {
 
                 {/* Background Filter */}
                 <div className="flex flex-col items-center space-y-2">
-                  <button className="w-14 h-14 rounded-full bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 shadow-sm flex items-center justify-center text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-slate-600 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 relative">
+                  <button
+                    onClick={() => setBackgroundBlurEnabled(!backgroundBlurEnabled)}
+                    className={`w-14 h-14 rounded-full border shadow-sm flex items-center justify-center text-gray-700 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 relative ${
+                      backgroundBlurEnabled
+                        ? 'bg-blue-600 border-blue-700 text-white dark:bg-blue-600 dark:border-blue-700'
+                        : 'bg-white dark:bg-slate-700 border-gray-200 dark:border-slate-600 dark:text-white hover:bg-gray-50 dark:hover:bg-slate-600'
+                    }`}
+                  >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
-                    <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-600 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-600"></span>
-                    </span>
+                    {backgroundBlurEnabled && (
+                      <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-400"></span>
+                      </span>
+                    )}
                   </button>
-                  <span className="text-xs font-medium text-gray-500 dark:text-slate-400">Background</span>
+                  <span className="text-xs font-medium text-gray-500 dark:text-slate-400">
+                    {backgroundBlurEnabled ? 'Blur On' : 'Background'}
+                  </span>
                 </div>
               </div>
             )}
@@ -356,38 +404,7 @@ const Video: React.FC = () => {
                     </svg>
                   </div>
                 </label>
-
-                {/* Option 2: Room Audio */}
-                <label className="cursor-pointer group">
-                  <input
-                    type="radio"
-                    name="audio-option"
-                    value="room-audio"
-                    checked={audioOption === 'room-audio'}
-                    onChange={(e) => setAudioOption(e.target.value)}
-                    className="hidden"
-                  />
-                  <div className="border border-gray-200 dark:border-slate-600 rounded-xl p-4 flex items-center transition-all duration-200 group-hover:border-blue-500/50 dark:group-hover:border-blue-400/50">
-                    <div
-                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-4 ${
-                        audioOption === 'room-audio'
-                          ? 'border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                          : 'border-gray-300 dark:border-slate-500'
-                      }`}
-                    >
-                      {audioOption === 'room-audio' && (
-                        <div className="w-2.5 h-2.5 rounded-full bg-blue-600 dark:bg-blue-400"></div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <span className="block font-semibold text-gray-800 dark:text-white text-sm">Room Audio</span>
-                      <span className="block text-xs text-gray-500 dark:text-slate-400 mt-0.5">Connect to nearby room system</span>
-                    </div>
-                    <svg className="w-5 h-5 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
-                    </svg>
-                  </div>
-                </label>
+            
 
                 {/* Option 3: Don't use audio */}
                 <label className="cursor-pointer group">

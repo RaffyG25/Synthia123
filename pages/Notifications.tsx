@@ -278,7 +278,7 @@ const Notifications: React.FC = () => {
                             <p className="text-sm font-medium text-gray-700 dark:text-slate-300">Attendees (4)</p>
                         </div>
                         <ul className="space-y-2 pl-7 text-sm">
-                            <li className="flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-[10px] font-bold">SM</span><span className="text-gray-900 font-medium dark:text-white">Sarah Mitchell</span><span className="text-xs text-gray-500 dark:text-slate-400">- Organizer</span></li>
+                            <li className="flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-[10px] font-bold">SM</span><span className="text-gray-900 font-medium dark:text-white">Sarah Mitchell</span><span className="text-xs text-gray-500 dark:text-slate-400">- Host</span></li>
                             <li className="flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-[10px] font-bold">JD</span><span className="text-gray-600 dark:text-slate-400">James Douglas</span></li>
                             <li className="flex items-center gap-2"><span className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-[10px] font-bold">You</span><span className="text-gray-600 dark:text-slate-400">Peter Parker</span><span className="text-xs text-red-500 font-medium">- Did not attend</span></li>
                         </ul>

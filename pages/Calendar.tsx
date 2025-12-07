@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   ChevronLeft, ChevronRight, Plus, 
   Calendar as CalendarIcon, Clock, MapPin, Video, 
@@ -22,9 +22,19 @@ interface Event {
 
 const Calendar: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [view, setView] = useState<'week' | 'month' | 'day'>('month');
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showNewEventModal, setShowNewEventModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  // Get date from URL parameter
+  useEffect(() => {
+    const dateParam = searchParams.get('date');
+    if (dateParam) {
+      setSelectedDate(dateParam);
+    }
+  }, [searchParams]);
 
   // Listen for header button click
   useEffect(() => {
