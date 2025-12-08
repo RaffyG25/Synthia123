@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Zap, Users, FileText } from 'lucide-react';
+import { ArrowRight, Zap, Users, FileText, LanguagesIcon } from 'lucide-react';
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
@@ -9,19 +9,19 @@ const Landing: React.FC = () => {
 
   const features = [
     {
-      icon: Zap,
-      title: 'Intelligent Design',
-      description: 'Experience AI-powered design suggestions that adapt to your workflow and enhance productivity.'
+      icon: LanguagesIcon,
+      title: 'Taglish Support',
+      description: 'Recognizes and transcribes mixed Filipino-English (Taglish) conversations.'
     },
     {
       icon: Users,
-      title: 'Seamless Collaboration',
-      description: 'Work together in real-time with team members across multiple workspaces and projects.'
+      title: 'All-in-One Meeting Toolkit',
+      description: 'Provides structured tools and guidance for all stages of a meeting: preparation, execution, and follow-up activities.'
     },
     {
       icon: FileText,
-      title: 'Smart Analytics',
-      description: 'Gain insights with comprehensive metrics and detailed reports on your team performance.'
+      title: 'Formal Reports Generator',
+      description: 'Produces professional reports following the organization’s formatting and content standards.'
     }
   ];
 
@@ -135,7 +135,7 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
-        <section id="features-section" className="py-16 md:py-24 px-6 bg-white">
+        <section id="pricing-section" className="py-16 md:py-24 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
