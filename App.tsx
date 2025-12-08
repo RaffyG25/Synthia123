@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, useLocation, Navigate } from 'react-router-d
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Landing from './pages/Landing';
+import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Calendar from './pages/Calendar';
 import Meetings from './pages/Meetings';
@@ -16,6 +17,7 @@ import MeetingHistory from './pages/MeetingHistory';
 import MeetingSummaryDetail from './pages/MeetingSummaryDetail';
 import Space from './pages/Space';
 import Video from './pages/Video';
+import Recording from './pages/Recording';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -24,13 +26,15 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Workspace has its own sidebar structure
   // Space has its own sidebar structure
   // Video has its own layout (no sidebar/header)
+  // Login has its own layout (no sidebar/header)
   const isLanding = location.pathname === '/';
+  const isLogin = location.pathname === '/login';
   const isMeetingRoom = location.pathname === '/meeting-room';
   const isWorkspace = location.pathname.startsWith('/workspace');
   const isSpace = location.pathname.startsWith('/space');
   const isVideo = location.pathname === '/video';
 
-  if (isLanding || isMeetingRoom || isVideo) {
+  if (isLanding || isMeetingRoom || isVideo || isLogin) {
     return <>{children}</>;
   }
 
@@ -62,6 +66,7 @@ const getPageTitle = (path: string): string => {
     case '/notifications': return 'Notifications';
     case '/profile': return 'Profile';
     case '/meeting-history': return 'Meeting History';
+    case '/meeting-summary': return 'Meeting Summary';
     default: return 'Synthia';
   }
 };
@@ -83,6 +88,7 @@ const App: React.FC = () => {
       <Layout>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/meetings" element={<Meetings />} />
@@ -91,10 +97,12 @@ const App: React.FC = () => {
           <Route path="/workspace" element={<Workspace />} />
           <Route path="/space" element={<Space />} />
           <Route path="/video" element={<Video />} />
+          <Route path="/recording" element={<Recording />} />
           <Route path="/meeting-room" element={<MeetingRoom />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/meeting-history" element={<MeetingHistory />} />
+          <Route path="/meeting-summary" element={<MeetingHistory />} />
           <Route path="/meeting-summary/:id" element={<MeetingSummaryDetail />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

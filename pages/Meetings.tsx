@@ -42,7 +42,7 @@ const Meetings: React.FC = () => {
 
         <div className="lg:col-span-1">
           <button 
-            onClick={() => navigate('/meeting-room')}
+            onClick={() => navigate('/recording')}
             className="w-full h-full block bg-white p-6 rounded-2xl shadow-md border-2 border-red-100 hover:shadow-lg transition-all hover:border-red-300 dark:bg-slate-800 dark:border-red-900"
           >
             <div className="flex flex-col items-center justify-center text-center h-full">

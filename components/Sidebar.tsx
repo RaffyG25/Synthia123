@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Bell, Calendar, Video, Users, CheckSquare, Settings, User } from 'lucide-react';
+import { LayoutDashboard, Bell, Calendar, Video, Users, CheckSquare, Settings, User, Mic2, NotepadText } from 'lucide-react';
 import synthiaLogo from "@/assets/synthia-logo.png";
 
 const Sidebar: React.FC = () => {
@@ -10,6 +10,7 @@ const Sidebar: React.FC = () => {
     { name: 'Calendar', path: '/calendar', icon: Calendar },
     { name: 'Meeting', path: '/meetings', icon: Video },
     { name: 'Collaboration', path: '/collaboration', icon: Users },
+    { name: 'Meeting Summary', path: '/meeting-summary', icon: NotepadText },
     { name: 'Task', path: '/tasks', icon: CheckSquare },
   ];
 
