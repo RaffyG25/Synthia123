@@ -1,6 +1,7 @@
 {
   "name": "synthia-dashboard",
   "homepage": "https://raffyg25.github.io/Synthia123/",
+  "private": false,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
