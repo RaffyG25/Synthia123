@@ -28,6 +28,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Space has its own sidebar structure
   // Video has its own layout (no sidebar/header)
   // Login has its own layout (no sidebar/header)
+  // Recording has no sidebar but has header
   const isLanding = location.pathname === '/';
   const isLogin = location.pathname === '/login';
   const isMeetingRoom = location.pathname === '/meeting-room';
