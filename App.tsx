@@ -14,6 +14,7 @@ import MeetingRoom from './pages/MeetingRoom';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import MeetingHistory from './pages/MeetingHistory';
+import MeetingSummary from './pages/MeetingSummary';
 import MeetingSummaryDetail from './pages/MeetingSummaryDetail';
 import Space from './pages/Space';
 import Video from './pages/Video';
@@ -102,7 +103,7 @@ const App: React.FC = () => {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/meeting-history" element={<MeetingHistory />} />
-          <Route path="/meeting-summary" element={<MeetingHistory />} />
+          <Route path="/meeting-summary" element={<MeetingSummary />} />
           <Route path="/meeting-summary/:id" element={<MeetingSummaryDetail />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
