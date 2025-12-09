@@ -94,7 +94,6 @@ const Dashboard: React.FC = () => {
   return (
     <div className="p-6 md:p-8 bg-gray-100 dark:bg-slate-900 min-h-full">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Good Day! User</h2>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
