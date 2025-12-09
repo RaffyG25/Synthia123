@@ -93,8 +93,8 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="p-6 md:p-8 bg-gray-100 dark:bg-slate-900 min-h-full">
-      <div className="mb-6">
-      </div>
+      {/*<div className="mb-6">
+      </div>*/}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
