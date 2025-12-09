@@ -27,6 +27,20 @@ const Meetings: React.FC = () => {
           </button>
 
           <button 
+            onClick={() => navigate('/recording')}
+            className="w-full h-full block bg-white p-6 rounded-2xl shadow-md border-2 border-red-100 hover:shadow-lg transition-all hover:border-red-300 dark:bg-slate-800 dark:border-red-900"
+          >
+            <div className="flex flex-col items-center justify-center text-center h-full">
+              <div className="p-4 bg-red-100 text-red-600 rounded-full mb-4 animate-pulse dark:bg-red-900/30 dark:text-red-400">
+                <div className="w-4 h-4 bg-red-600 rounded-full"></div>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-1 dark:text-white">Record Meeting</h3>
+              <p className="text-sm text-gray-500 dark:text-slate-400">Start live transcription & recording.</p>
+            </div>
+          </button>
+          </div>
+
+          <button 
             onClick={() => navigate('/meeting-history')}
             className="bg-white p-6 rounded-2xl shadow-md hover:shadow-lg transition-shadow text-left dark:bg-slate-800 dark:border dark:border-slate-700"
           >
@@ -39,22 +53,6 @@ const Meetings: React.FC = () => {
             </div>
           </button>
         </div>
-
-        <div className="lg:col-span-1">
-          <button 
-            onClick={() => navigate('/recording')}
-            className="w-full h-full block bg-white p-6 rounded-2xl shadow-md border-2 border-red-100 hover:shadow-lg transition-all hover:border-red-300 dark:bg-slate-800 dark:border-red-900"
-          >
-            <div className="flex flex-col items-center justify-center text-center h-full">
-              <div className="p-4 bg-red-100 text-red-600 rounded-full mb-4 animate-pulse dark:bg-red-900/30 dark:text-red-400">
-                <div className="w-4 h-4 bg-red-600 rounded-full"></div>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-1 dark:text-white">Start Instant Meeting</h3>
-              <p className="text-sm text-gray-500 dark:text-slate-400">Launch a new meeting room immediately.</p>
-            </div>
-          </button>
-        </div>
-      </div>
 
       <div className="bg-white p-6 rounded-2xl shadow-md dark:bg-slate-800 dark:border dark:border-slate-700">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 dark:text-white">Upcoming Meetings</h3>

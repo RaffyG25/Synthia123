@@ -3,21 +3,23 @@ import React, { useState } from 'react';
 import { 
   MoreHorizontal, Calendar, Clock, Video, 
   AlertTriangle, Phone, CheckSquare, MessageSquare, 
-  User, Bell, Search, Filter, X
+  User, Bell, Search, Filter, X, Users, Check
 } from 'lucide-react';
 
-type FilterType = 'all' | 'unread' | 'mentions' | 'tasks';
+type FilterType = 'all' | 'unread' | 'mentions' | 'tasks' | 'invites';
 
 interface NotificationItem {
   id: string;
-  category: FilterType | 'tasks';
-  type: 'meeting' | 'mention' | 'task' | 'deadline' | 'missed';
+  category: FilterType | 'tasks' | 'invites';
+  type: 'meeting' | 'mention' | 'task' | 'deadline' | 'missed' | 'invite';
   unread: boolean;
   initials: React.ReactNode;
   initialsBg: string;
   name: string;
   preview: string;
   time: string;
+  inviter?: string;
+  teamName?: string;
 }
 
 const Notifications: React.FC = () => {
@@ -29,6 +31,19 @@ const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<NotificationItem[]>([
     {
       id: '1',
+      category: 'invites',
+      type: 'invite',
+      unread: true,
+      initials: 'D',
+      initialsBg: 'bg-blue-500',
+      name: 'Design System Team',
+      preview: 'Invitation from Sarah Chen',
+      time: '2m',
+      inviter: 'Sarah Chen',
+      teamName: 'Design System Team'
+    },
+    {
+      id: '2',
       category: 'tasks',
       type: 'meeting',
       unread: true,
@@ -39,7 +54,7 @@ const Notifications: React.FC = () => {
       time: '8:46 PM'
     },
     {
-      id: '2',
+      id: '3',
       category: 'mentions',
       type: 'mention',
       unread: true,
@@ -50,7 +65,7 @@ const Notifications: React.FC = () => {
       time: '10m'
     },
     {
-      id: '3',
+      id: '4',
       category: 'tasks',
       type: 'task',
       unread: false,
@@ -61,7 +76,7 @@ const Notifications: React.FC = () => {
       time: '2h'
     },
     {
-      id: '4',
+      id: '5',
       category: 'tasks',
       type: 'deadline',
       unread: false,
@@ -72,7 +87,7 @@ const Notifications: React.FC = () => {
       time: '1d'
     },
     {
-      id: '5',
+      id: '6',
       category: 'tasks',
       type: 'missed',
       unread: false,
@@ -87,15 +102,34 @@ const Notifications: React.FC = () => {
   const handleNotificationClick = (id: string) => {
     setSelectedId(id);
     // Mark as read when clicked
-    setNotifications(prev => 
-      prev.map(item => item.id === id ? { ...item, unread: false } : item)
-    );
+    setNotifications(prev => {
+      const updated = prev.map(item => item.id === id ? { ...item, unread: false } : item);
+      updateUnreadCount(updated);
+      return updated;
+    });
   };
 
   const markAllAsRead = () => {
-    setNotifications(prev => prev.map(item => ({ ...item, unread: false })));
+    setNotifications(prev => {
+      const updated = prev.map(item => ({ ...item, unread: false }));
+      updateUnreadCount(updated);
+      return updated;
+    });
     setShowMenu(false);
   };
+
+  const updateUnreadCount = (notifs: NotificationItem[]) => {
+    const unreadCount = notifs.filter(n => n.unread).length;
+    sessionStorage.setItem('unreadNotificationCount', unreadCount.toString());
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  // Initialize unread count on mount
+  React.useEffect(() => {
+    const unreadCount = notifications.filter(n => n.unread).length;
+    sessionStorage.setItem('unreadNotificationCount', unreadCount.toString());
+    window.dispatchEvent(new Event('storage'));
+  }, []);
 
   // Filter Logic
   const filteredNotifications = notifications.filter(item => {
@@ -103,6 +137,7 @@ const Notifications: React.FC = () => {
     if (activeFilter === 'unread') return item.unread;
     if (activeFilter === 'mentions') return item.category === 'mentions';
     if (activeFilter === 'tasks') return item.category === 'tasks';
+    if (activeFilter === 'invites') return item.category === 'invites';
     return true;
   });
 
@@ -291,6 +326,47 @@ const Notifications: React.FC = () => {
             </div>
           </div>
         );
+
+      case 'invite':
+        return (
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 p-8 max-w-4xl mx-auto animate-in fade-in duration-300">
+            <div className="flex justify-between items-start mb-8 pb-6 border-b border-gray-100 dark:border-slate-700">
+              <div className="flex gap-5">
+                <div className="w-12 h-12 bg-blue-50 dark:bg-slate-700 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Users className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{selectedItem.teamName || 'Team Invitation'}</h2>
+                  <p className="text-sm text-gray-500 dark:text-slate-400">Invitation from <span className="font-semibold text-gray-900 dark:text-slate-200">{selectedItem.inviter || 'Team Admin'}</span></p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button className="px-6 py-2 bg-violet-600 text-white rounded-lg font-bold text-sm hover:bg-violet-700 shadow-sm shadow-violet-200 dark:shadow-none transition-colors flex items-center gap-2">
+                  <Check className="w-4 h-4" /> Accept
+                </button>
+                <button className="px-6 py-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg font-bold text-sm hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">Decline</button>
+              </div>
+            </div>
+            <div className="space-y-6 mb-8">
+              <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-slate-300">
+                 <Users className="w-5 h-5 text-gray-400" />
+                 <span>Join a collaborative team workspace</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-gray-700 dark:text-slate-300">
+                 <Bell className="w-5 h-5 text-gray-400" />
+                 <span>Stay updated with team notifications and activity</span>
+              </div>
+            </div>
+            <div className="bg-gray-50 dark:bg-slate-700/30 rounded-xl p-6 border border-gray-100 dark:border-slate-700">
+              <h4 className="font-bold text-gray-900 dark:text-white mb-4 text-sm">Why join this team?</h4>
+              <ul className="space-y-3 text-sm text-gray-600 dark:text-slate-300">
+                <li className="flex items-start gap-3"><span className="mt-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></span><span>Collaborate with team members on projects</span></li>
+                <li className="flex items-start gap-3"><span className="mt-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></span><span>Access shared resources and documentation</span></li>
+                <li className="flex items-start gap-3"><span className="mt-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></span><span>Participate in team meetings and discussions</span></li>
+              </ul>
+            </div>
+          </div>
+        );
       
       default:
         return null;
@@ -320,7 +396,7 @@ const Notifications: React.FC = () => {
             </div>
           </div>
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {['all', 'unread', 'mentions', 'tasks'].map(filter => (
+            {['all', 'unread', 'mentions', 'tasks', 'invites'].map(filter => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter as FilterType)}
@@ -330,7 +406,7 @@ const Notifications: React.FC = () => {
                     : 'bg-gray-50 text-gray-500 hover:bg-gray-100 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                 }`}
               >
-                {filter === 'mentions' ? '@Mentions' : filter.charAt(0).toUpperCase() + filter.slice(1)}
+                {filter === 'mentions' ? '@Mentions' : filter === 'invites' ? 'Invites' : filter.charAt(0).toUpperCase() + filter.slice(1)}
               </button>
             ))}
           </div>

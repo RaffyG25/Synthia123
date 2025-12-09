@@ -1,12 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Bell, Calendar, Video, Users, CheckSquare, Settings, User, Mic2, NotepadText } from 'lucide-react';
 import synthiaLogo from "@/assets/synthia-logo.png";
 
 const Sidebar: React.FC = () => {
+  const [hasUnread, setHasUnread] = useState(false);
+
+  useEffect(() => {
+    // Check for unread notifications
+    const checkUnread = () => {
+      // This checks if there are any unread notifications
+      // We're checking sessionStorage or can be connected to a global state
+      const unreadCount = sessionStorage.getItem('unreadNotificationCount');
+      setHasUnread(unreadCount ? parseInt(unreadCount) > 0 : true);
+    };
+
+    checkUnread();
+    // Listen for storage changes
+    window.addEventListener('storage', checkUnread);
+    return () => window.removeEventListener('storage', checkUnread);
+  }, []);
+
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Notification', path: '/notifications', icon: Bell },
+    { name: 'Notification', path: '/notifications', icon: Bell, badge: hasUnread },
     { name: 'Calendar', path: '/calendar', icon: Calendar },
     { name: 'Meeting', path: '/meetings', icon: Video },
     { name: 'Collaboration', path: '/collaboration', icon: Users },
@@ -29,14 +46,19 @@ const Sidebar: React.FC = () => {
               key={item.name}
               to={item.path}
               className={({ isActive }) =>
-                `flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${
+                `flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors relative ${
                   isActive
                     ? 'bg-violet-600 text-white shadow-md shadow-violet-200 dark:shadow-none'
                     : 'text-gray-600 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200'
                 }`
               }
             >
-              <item.icon className="w-5 h-5" />
+              <div className="relative">
+                <item.icon className="w-5 h-5" />
+                {item.badge && (
+                  <span className="absolute -top-1 -right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border border-white dark:border-slate-800"></span>
+                )}
+              </div>
               <span>{item.name}</span>
             </NavLink>
           ))}
