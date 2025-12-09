@@ -39,7 +39,7 @@ const Landing: React.FC = () => {
           poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'%3E%3Crect fill='%23f3f4f6' width='1200' height='800'/%3E%3C/svg%3E"
         >
           {/* Replace the src below with your stock video URL */}
-          <source src="../assets/stock-video.mp4" type="video/mp4" />
+          <source src={`${import.meta.env.BASE_URL}assets/stock-video.mp4`} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
 
@@ -50,7 +50,7 @@ const Landing: React.FC = () => {
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <div className="mb-8 animate-fade-in">
             <img
-              src="/assets/synthia-logo.png"
+              src={`${import.meta.env.BASE_URL}assets/synthia-logo.png`}
               alt="Synthia Logo"
               className="h-32 md:h-48 mx-auto"
             />
