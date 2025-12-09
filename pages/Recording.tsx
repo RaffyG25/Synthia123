@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
-import { Pause, Square, Volume2, MessageSquare } from 'lucide-react';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
+import { Pause, Square, Volume2, MessageSquare, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Recording: React.FC = () => {
+  const navigate = useNavigate();
   const [isRecording, setIsRecording] = useState(true);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-slate-900">
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-gray-50 dark:bg-slate-900">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="p-6 md:p-8 overflow-y-auto bg-gray-50 dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto">
+          {/* Back Button */}
+          <button 
+            onClick={() => navigate('/meetings')}
+            className="flex items-center gap-2 mb-6 text-violet-600 hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300 font-medium transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Meetings
+          </button>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
             
             {/* Left Column: Recording Visualizer (2/3 width) */}
             <div className="lg:col-span-2 flex flex-col">
