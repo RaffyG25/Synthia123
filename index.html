@@ -34,6 +34,12 @@
   <script type="module" crossorigin src="/Synthia123/assets/index-bxYXafAL.js"></script>
 </head>
 <body class="bg-gray-100 font-sans transition-colors duration-300 dark:bg-slate-900">
-    <div id="root"></div>
+    <div id="root"></div>
+    <script>
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e);
+            document.getElementById('root').innerHTML = '<div style="padding: 40px; text-align: center; color: red;">Error loading application. Check console for details.</div>';
+        });
+    </script>
 </body>
 </html>
