@@ -48,7 +48,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-slate-900">
       <Sidebar />
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <Header title={getPageTitle(location.pathname)} />
+        <Header title=""/>
         <main className="flex-1 overflow-y-auto overflow-x-hidden">
           {children}
         </main>
