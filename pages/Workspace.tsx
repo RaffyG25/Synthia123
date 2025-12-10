@@ -14,7 +14,7 @@ const Workspace: React.FC = () => {
       {/* Workspace Sidebar */}
       <aside className="w-64 bg-gray-50 dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 flex flex-col">
         <div className="p-3 border-b border-gray-200 dark:border-slate-700">
-          <div onClick={() => navigate('/collaboration')} className="flex items-center justify-between p-2 hover:bg-gray-200 dark:hover:bg-slate-700 rounded cursor-pointer">
+          <div className="flex items-center justify-between p-2 hover:bg-gray-200 dark:hover:bg-slate-700 rounded cursor-pointer">
             <div className="flex items-center space-x-2">
               <div className="w-6 h-6 bg-gray-400 rounded flex items-center justify-center text-xs font-bold text-white">S</div>
               <span className="font-bold text-gray-800 dark:text-white truncate">SBIT-3K</span>
@@ -28,11 +28,11 @@ const Workspace: React.FC = () => {
         <div className="p-3 flex-1 overflow-y-auto">
 
           <div 
-            onClick={() => navigate('/workspace')}
+            onClick={() => navigate('/collaboration')}
             className="flex items-center space-x-2 px-4 py-1.5 rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors pb-2"
           >
             <ChevronLeft className="w-4 h-4 text-gray-500"/>
-            <span className="text-sm font-medium text-gray-800 dark:text-slate-200">Back to Workspace</span>
+            <span className="text-sm font-medium text-gray-800 dark:text-slate-200">Back to Collaboration</span>
           </div>
 
           <div 
@@ -48,7 +48,6 @@ const Workspace: React.FC = () => {
           <div className="mb-6 pt-4">
             <div className="flex items-center justify-between px-2 mb-2">
               <span className="text-xs font-semibold text-gray-500 uppercase">Channels</span>
-              <Plus className="w-4 h-4 text-gray-500 cursor-pointer hover:text-gray-700" />
             </div>
             {['general', 'announcements', 'projects', 'random'].map(channel => (
               <div 

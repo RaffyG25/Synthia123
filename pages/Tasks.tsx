@@ -1,503 +1,511 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, MoreHorizontal, Play, Square, X, Calendar, Repeat } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { 
+  User, Briefcase, Calendar as CalendarIcon, ChevronRight, 
+  Filter, CheckCircle, Plus, Menu, MoreHorizontal, X, 
+  Flag, Bot, Shield, Trash2, Edit2, Check, ChevronDown
+} from "lucide-react";
 
-const Tasks: React.FC = () => {
-  const [view, setView] = useState<'board' | 'list'>('list');
-  const [selectedTask, setSelectedTask] = useState<any>(null);
-  const [activeCategory, setActiveCategory] = useState<string>('today-content');
-  const [showReschedulePopup, setShowReschedulePopup] = useState(false);
+// --- Types ---
+interface Assignee {
+  name: string;
+  avatar: string;
+}
+
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  category: "personal" | "workspace";
+  status: "pending_approval" | "todo" | "ongoing" | "completed";
+  project: string;
+  priority: "High" | "Medium" | "Low" | "None"; 
+  overdue?: boolean; 
+  isAiGenerated?: boolean;
+  assignees: Assignee[];
+}
+
+// --- Sub-Components ---
+
+interface TaskItemProps {
+  task: Task;
+  onClick: (task: Task) => void;
+}
+
+const BoardTaskCard: React.FC<TaskItemProps> = ({ task, onClick }) => (
+  <div onClick={() => onClick(task)} className={`bg-white dark:bg-slate-800 border ${task.isAiGenerated ? 'border-violet-300 dark:border-violet-700 ring-1 ring-violet-100 dark:ring-violet-900' : 'border-gray-200 dark:border-slate-700'} rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer group relative flex flex-col gap-3`}>
+    <div className="flex items-start justify-between">
+      <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold px-2 py-1 rounded bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-gray-300 uppercase tracking-wider">{task.project}</span>
+          {task.isAiGenerated && (
+              <span className="flex items-center gap-1 text-[10px] font-bold bg-violet-100 text-violet-600 px-2 py-1 rounded-full border border-violet-200">
+                  <Bot className="w-3 h-3" /> AI
+              </span>
+          )}
+      </div>
+      {task.status === 'pending_approval' ? (
+          <span className="relative flex h-2.5 w-2.5">
+          </span>
+      ) : (
+          <MoreHorizontal className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+      )}
+    </div>
+    
+    <div>
+        <h3 className="font-bold text-gray-800 dark:text-white leading-tight mb-1">{task.title}</h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{task.description}</p>
+    </div>
+
+    <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-slate-700 mt-auto">
+       <div className="flex items-center gap-2">
+           <div className="flex -space-x-1.5">
+               {task.assignees.map((u, i) => (
+                   <img key={i} src={u.avatar} alt={u.name} className="w-5 h-5 rounded-full border border-white dark:border-slate-800" title={u.name} />
+               ))}
+           </div>
+           {task.assignees.length === 0 && <span className="text-[10px] text-gray-400 italic">Unassigned</span>}
+       </div>
+       
+       <div className="flex items-center gap-2">
+          {/* Priority Flag for Board Card */}
+          <Flag className={`w-3 h-3 ${
+              task.priority === 'High' ? 'text-red-600 fill-red-600' : 
+              task.priority === 'Medium' ? 'text-orange-500 fill-orange-500' : 
+              task.priority === 'Low' ? 'text-blue-600 fill-blue-600' : 'text-gray-300'
+          }`} />
+          <span className={`text-xs flex items-center gap-1 font-medium ${task.overdue ? 'text-red-500' : 'text-gray-400'}`}>
+              <CalendarIcon className="w-3 h-3" /> {task.dueDate}
+          </span>
+       </div>
+    </div>
+  </div>
+);
+
+const ListTaskItem: React.FC<TaskItemProps> = ({ task, onClick }) => (
+  <div onClick={() => onClick(task)} className={`flex items-center gap-4 p-4 bg-white dark:bg-slate-800 border-b ${task.status === 'pending_approval' ? 'border-orange-100 bg-orange-50/10' : 'border-gray-100 dark:border-slate-700'} last:border-0 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer group`}>
+    <div className="pt-0.5">
+        {task.status === 'pending_approval' ? (
+            <Bot className="w-5 h-5 text-violet-500" />
+        ) : (
+            <input type="checkbox" aria-label="Mark as complete" className="rounded border-gray-300 text-violet-600 focus:ring-violet-500 h-4 w-4 cursor-pointer" />
+        )}
+    </div>
+    
+    <div className="flex-1 min-w-0 grid grid-cols-12 gap-4 items-center">
+        <div className="col-span-5">
+            <div className="flex items-center gap-2">
+                <span className="font-semibold text-gray-900 dark:text-white text-sm truncate">{task.title}</span>
+                {task.isAiGenerated && <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-100 text-violet-600 font-bold">AI</span>}
+                {task.status === 'pending_approval' && <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-100 text-orange-600 font-bold">Review</span>}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{task.description}</p>
+        </div>
+
+        <div className="col-span-3 flex items-center gap-1">
+             <div className="flex -space-x-2">
+               {task.assignees.map((u, i) => (
+                   <img key={i} src={u.avatar} alt={u.name} className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800" title={u.name} />
+               ))}
+             </div>
+             {task.assignees.length === 0 && <span className="text-xs text-gray-400">--</span>}
+        </div>
+
+        <div className="col-span-2 text-xs text-gray-500 flex items-center gap-1">
+            <Flag className={`w-3 h-3 ${
+                task.priority === 'High' ? 'text-red-600 fill-red-600' : 
+                task.priority === 'Medium' ? 'text-orange-500 fill-orange-500' : 
+                task.priority === 'Low' ? 'text-blue-600 fill-blue-600' : 'text-gray-400'
+            }`} />
+            <span>{task.priority}</span>
+        </div>
+
+        <div className="col-span-2 text-right">
+             <span className={`text-xs font-medium ${task.overdue ? 'text-red-500' : 'text-gray-500'}`}>{task.dueDate}</span>
+        </div>
+    </div>
+  </div>
+);
+
+// --- MAIN COMPONENT ---
+
+const Tasks = () => {
+  const [activeView, setActiveView] = useState<"personal" | "workspace">("workspace");
+  const [activeTab, setActiveTab] = useState<"board" | "list">("list");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [sidebarView, setSidebarView] = useState<"categories" | "today" | "upcoming" | "filters" | "completed">("categories");
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [showCreateTaskModal, setShowCreateTaskModal] = useState(false);
+  const [showLeftSidebar, setShowLeftSidebar] = useState(false);
 
   useEffect(() => {
-    if (selectedTask) {
+    if (selectedTask || showCreateTaskModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => { document.body.style.overflow = 'unset'; };
-  }, [selectedTask]);
+  }, [selectedTask, showCreateTaskModal]);
 
-  const tasks = {
-    todo: [
-      { id: 1, title: 'Wireframe Homepage', tags: ['Blueprint'], date: 'Feb 23', checklist: '0/20', status: 'In Progress', priority: 'High', workspace: 'Capstone 101', description: 'Create initial low-fidelity wireframes for the landing page.' },
-      { id: 2, title: 'Create UI Style Guide', tags: ['Design'], date: 'Feb 28', checklist: '0/14', status: 'To Do', priority: 'Medium', workspace: 'Capstone 101', description: 'Define typography, color palette, and component library.' },
-    ],
-    ongoing: [
-      { id: 3, title: 'High-Fidelity Homepage', tags: ['Pixel Perfect'], date: 'Tomorrow', checklist: '10/20', active: true, status: 'In Progress', priority: 'High Priority', workspace: 'Capstone 101', description: 'Draft the initial wireframes.' },
-    ],
-    completed: [
-      { id: 4, title: 'Prototype for Testing', tags: ['Proto'], date: 'Jan 28', checklist: '19/19', status: 'Completed', priority: 'Low', workspace: 'Capstone 101', description: 'Interactive prototype.' },
-    ]
+  const tasks: Task[] = [
+    { 
+        id: "1", title: "Wireframe Homepage", description: "Plan the homepage layout.", dueDate: "Yesterday", category: "personal", status: "todo", project: "Capstone 101", priority: "High", overdue: true, 
+        assignees: [{ name: "Peter Parker", avatar: "https://i.pravatar.cc/150?u=peter" }] 
+    },
+    { 
+        id: "2", title: "High-Fidelity Homepage Design", description: "Create high-fi designs.", dueDate: "Yesterday", category: "personal", status: "todo", project: "Capstone 101", priority: "Medium", overdue: true, 
+        assignees: [{ name: "Peter Parker", avatar: "https://i.pravatar.cc/150?u=peter" }] 
+    },
+    { 
+        id: "5", title: "API Integration", description: "Connect frontend to backend.", dueDate: "Tomorrow", category: "workspace", status: "todo", project: "Internal Tools", priority: "High", 
+        assignees: [
+            { name: "Sarah Chen", avatar: "https://i.pravatar.cc/150?u=sarah" },
+            { name: "Mike Ross", avatar: "https://i.pravatar.cc/150?u=mike" }
+        ] 
+    },
+  ];
+
+  const filterByStatus = (status: Task["status"]) => {
+    return tasks.filter(t => t.status === status && t.category === activeView);
   };
 
-  const today = [
-    { id: 10, title: 'Wireframe Homepage', overdue: true, workspace: 'Capstone 101' },
-    { id: 11, title: 'High-Fidelity Homepage Design', overdue: true, workspace: 'Capstone 101' },
-    { id: 12, title: 'Create UI Style Guide', description: 'Define colors, typography, and components.', workspace: 'Capstone 101' },
-  ];
+  const pendingTasks = tasks.filter(t => t.status === 'pending_approval' && t.category === 'workspace');
 
-  const personalTasks = [
-    { id: 20, title: 'Buy groceries', dueDate: 'Tomorrow', category: 'Personal' },
-    { id: 21, title: 'Gym session - 6 PM', dueDate: 'Today', category: 'Personal' },
-  ];
+  // --- TASK DETAIL MODAL ---
+  const TaskDetailModal = () => {
+      const [isEditing, setIsEditing] = useState(false);
+      const [editTitle, setEditTitle] = useState(selectedTask?.title || "");
+      const [editDesc, setEditDesc] = useState(selectedTask?.description || "");
 
-  const workspaceTasks = [
-    { id: 22, title: 'Review design mockups', dueDate: 'Nov 20 • Workspace: Design Team', category: 'Workspace' },
-  ];
+      if (!selectedTask) return null;
+      const isPending = selectedTask.status === 'pending_approval';
 
-  const upcomingTasks = [
-    { id: 30, date: '19 Nov - Tomorrow - Wednesday', title: 'API Integration', workspace: 'Internal Tools' },
-    { id: 31, date: '20 Nov - Thursday', title: 'Write Documentation', workspace: 'Internal Tools' },
-  ];
+      const handleApprove = () => {
+          alert(`Task "${editTitle}" Approved and Distributed!`);
+          setSelectedTask(null);
+      };
+
+      const handleReject = () => {
+          if(window.confirm("Are you sure you want to reject this task?")) {
+             setSelectedTask(null);
+          }
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="fixed inset-0 bg-black/60 transition-opacity backdrop-blur-sm" onClick={() => setSelectedTask(null)}></div>
+            <div className="flex min-h-full items-center justify-center p-4">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full relative overflow-hidden border border-gray-100 dark:border-slate-700 flex flex-col">
+                      {isPending ? (
+                          <div className="bg-orange-50 dark:bg-orange-900/20 px-6 py-4 border-b border-orange-100 dark:border-orange-800 flex items-start gap-4">
+                              <div className="p-2 bg-white dark:bg-orange-900/40 rounded-full shadow-sm">
+                                <Shield className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                              </div>
+                              <div className="flex-1">
+                                  <h3 className="text-base font-bold text-gray-900 dark:text-white">Admin Approval Required</h3>
+                                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-0.5">Synthia generated this task. Please review before distributing.</p>
+                              </div>
+                              <button onClick={() => setSelectedTask(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                          </div>
+                      ) : (
+                          <div className="px-6 py-4 flex justify-between items-center border-b border-gray-100 dark:border-slate-700">
+                              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">{selectedTask.project}</span>
+                              <button onClick={() => setSelectedTask(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+                          </div>
+                      )}
+                      
+                      <div className="p-6 overflow-y-auto max-h-[70vh]">
+                          {/* Title */}
+                          {isEditing ? (
+                              <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} className="w-full text-xl font-bold mb-4 border-b-2 border-violet-500 focus:outline-none bg-transparent dark:text-white" />
+                          ) : (
+                              <div className="flex items-start gap-3 mb-6">
+                                  <div className={`mt-1 p-2 rounded-lg ${selectedTask.status === 'completed' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'} dark:bg-slate-700`}>
+                                      {selectedTask.status === 'completed' ? <CheckCircle className="w-5 h-5" /> : <Briefcase className="w-5 h-5" />}
+                                  </div>
+                                  <div>
+                                      <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                          {selectedTask.title} 
+                                      </h2>
+                                      <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">Created via {selectedTask.isAiGenerated ? <span className="flex items-center gap-1 text-violet-600 font-semibold"><Bot className="w-3 h-3"/> Synthia AI</span> : "Manual Entry"}</p>
+                                  </div>
+                              </div>
+                          )}
+
+                          {/* Description */}
+                          <div className="mb-6">
+                              <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">Description</h4>
+                              {isEditing ? (
+                                  <textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} className="w-full text-sm text-gray-600 dark:text-gray-300 border rounded-lg p-3 focus:outline-none focus:border-violet-500 bg-gray-50 dark:bg-slate-700" rows={4} />
+                              ) : (
+                                  <div className="p-4 bg-gray-50 dark:bg-slate-700/30 rounded-xl border border-gray-100 dark:border-slate-700">
+                                      <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{selectedTask.description}</p>
+                                  </div>
+                              )}
+                          </div>
+
+                          {/* Details Grid */}
+                          <div className="grid grid-cols-2 gap-6 mb-6">
+                              <div>
+                                  <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">Due Date</h4>
+                                  <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200"><CalendarIcon className="w-4 h-4 text-gray-400" />{selectedTask.dueDate}</div>
+                              </div>
+                              <div>
+                                  <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">Priority</h4>
+                                  <div className="flex items-center gap-2 text-sm font-medium">
+                                      <Flag className={`w-4 h-4 ${selectedTask.priority === 'High' ? 'text-red-500 fill-red-500' : selectedTask.priority === 'Medium' ? 'text-orange-500 fill-orange-500' : selectedTask.priority === 'Low' ? 'text-blue-500 fill-blue-500' : 'text-gray-400'}`} />
+                                      <span>{selectedTask.priority} Priority</span>
+                                  </div>
+                              </div>
+                          </div>
+
+                          {/* Assignees */}
+                          <div>
+                              <div className="flex justify-between items-center mb-2">
+                                  <h4 className="text-xs font-bold text-gray-400 uppercase">Assigned Members</h4>
+                                  {isEditing && <button className="text-xs text-violet-600 font-medium hover:underline">+ Add Member</button>}
+                              </div>
+                              <div className="flex items-center gap-3">
+                                  {selectedTask.assignees.length > 0 ? (
+                                      selectedTask.assignees.map((assignee, idx) => (
+                                          <div key={idx} className="flex items-center gap-2 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-full pl-1 pr-3 py-1 shadow-sm">
+                                              <img src={assignee.avatar} alt={assignee.name} className="w-6 h-6 rounded-full" />
+                                              <span className="text-xs font-medium text-gray-700 dark:text-gray-200">{assignee.name}</span>
+                                              {isEditing && <button className="ml-1 text-gray-400 hover:text-red-500"><X className="w-3 h-3" /></button>}
+                                          </div>
+                                      ))
+                                  ) : (
+                                      <span className="text-sm text-gray-400 italic flex items-center gap-2">
+                                          <User className="w-4 h-4" /> No members assigned
+                                      </span>
+                                  )}
+                              </div>
+                          </div>
+                      </div>
+
+                      <div className="bg-gray-50 dark:bg-slate-700/50 px-6 py-4 border-t border-gray-100 dark:border-slate-700 flex justify-between items-center">
+                          <button onClick={handleReject} className="text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 text-sm font-medium flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                              <Trash2 className="w-4 h-4" /> {isPending ? 'Reject Task' : 'Delete'}
+                          </button>
+                          <div className="flex gap-3">
+                              {isEditing ? (
+                                  <>
+                                    <button onClick={() => setIsEditing(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors">Cancel</button>
+                                    <button onClick={() => setIsEditing(false)} className="px-6 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-sm font-medium shadow-md transition-colors">Save Changes</button>
+                                  </>
+                              ) : (
+                                  <>
+                                    <button onClick={() => setIsEditing(true)} className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-slate-600 border border-transparent hover:border-gray-200 dark:hover:border-slate-500 rounded-lg text-sm font-medium flex items-center gap-2 transition-all">
+                                        <Edit2 className="w-4 h-4" /> Edit
+                                    </button>
+                                    {isPending && (
+                                        <button onClick={handleApprove} className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-bold flex items-center gap-2 shadow-lg shadow-green-200 dark:shadow-none transition-all transform hover:-translate-y-0.5">
+                                            <Check className="w-4 h-4" /> Approve & Distribute
+                                        </button>
+                                    )}
+                                  </>
+                              )}
+                          </div>
+                      </div>
+                </div>
+            </div>
+        </div>
+      );
+  }
+
+  // --- CREATE TASK MODAL (TODOIST STYLE w/ DROPDOWN PRIORITY) ---
+  const CreateTaskModal = () => {
+    const [selectedPriority, setSelectedPriority] = useState<string>('P4');
+    const [showPriorityDropdown, setShowPriorityDropdown] = useState(false);
+    const [date, setDate] = useState<string>('');
+
+    // Updated Priority Options (Explicit High/Medium/Low)
+    const priorities = [
+      { id: 'P1', label: 'High Priority', color: 'text-red-600', iconColor: 'fill-red-600 text-red-600' },
+      { id: 'P2', label: 'Medium Priority', color: 'text-orange-500', iconColor: 'fill-orange-500 text-orange-500' },
+      { id: 'P3', label: 'Low Priority', color: 'text-blue-600', iconColor: 'fill-blue-600 text-blue-600' },
+      { id: 'P4', label: 'No Priority', color: 'text-gray-500', iconColor: 'text-gray-500' },
+    ];
+
+    const currentPriority = priorities.find(p => p.id === selectedPriority) || priorities[3];
+
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCreateTaskModal(false)}></div>
+          <div className="flex min-h-full items-start justify-center p-4 pt-24"> 
+             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-xl relative border border-gray-100 dark:border-slate-700 overflow-visible">
+                 
+                 <div className="p-4">
+                     <div className="flex items-start gap-4">
+                         <div className="flex-1">
+                             <input 
+                                  type="text" 
+                                  placeholder="Task name" 
+                                  autoFocus
+                                  className="w-full text-lg font-semibold placeholder:text-gray-400 border-none outline-none bg-transparent dark:text-white p-0 m-0"
+                             />
+                             <textarea 
+                                  placeholder="Description" 
+                                  className="w-full text-sm text-gray-600 dark:text-gray-300 placeholder:text-gray-400 border-none outline-none bg-transparent resize-none mt-2 p-0 m-0"
+                                  rows={2}
+                             />
+                         </div>
+                     </div>
+  
+                     {/* Quick Action Row */}
+                     <div className="flex items-center gap-2 mt-4 relative">
+                         {/* DUE DATE WITH NATIVE PICKER */}
+                         <div className="relative">
+                            <button className="flex items-center gap-1.5 px-2 py-1 rounded border border-gray-200 dark:border-slate-600 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors pointer-events-none">
+                                <CalendarIcon className={`w-3.5 h-3.5 ${date ? 'text-green-600' : 'text-green-500'}`} /> 
+                                {date ? new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Due Date'}
+                            </button>
+                            <input 
+                                type="date" 
+                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" 
+                                onChange={(e) => setDate(e.target.value)}
+                            />
+                         </div>
+                         
+                         {/* PRIORITY DROPDOWN */}
+                         <div className="relative">
+                             <button 
+                                onClick={() => setShowPriorityDropdown(!showPriorityDropdown)}
+                                className={`flex items-center gap-1.5 px-2 py-1 rounded border border-gray-200 dark:border-slate-600 text-xs font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${currentPriority.color}`}
+                             >
+                                 <Flag className={`w-3.5 h-3.5 ${currentPriority.iconColor}`} /> {currentPriority.label}
+                             </button>
+
+                             {showPriorityDropdown && (
+                                <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-xl z-50 overflow-hidden py-1">
+                                    {priorities.map((p) => (
+                                        <button
+                                            key={p.id}
+                                            onClick={() => { setSelectedPriority(p.id); setShowPriorityDropdown(false); }}
+                                            className="w-full text-left px-3 py-2 flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                                        >
+                                            <Flag className={`w-4 h-4 ${p.iconColor}`} />
+                                            <span className={`text-sm ${p.id === selectedPriority ? 'font-bold' : ''} text-gray-700 dark:text-gray-200`}>{p.label}</span>
+                                            {p.id === selectedPriority && <Check className="w-3 h-3 text-violet-600 ml-auto" />}
+                                        </button>
+                                    ))}
+                                </div>
+                             )}
+                         </div>
+                     </div>
+                 </div>
+  
+                 {/* Footer Action Bar - NO INBOX */}
+                 <div className="bg-gray-50 dark:bg-slate-700/50 px-4 py-3 border-t border-gray-100 dark:border-slate-700 flex justify-end items-center gap-3">
+                     <button 
+                          onClick={() => setShowCreateTaskModal(false)} 
+                          className="px-4 py-2 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded transition-colors"
+                     >
+                         Cancel
+                     </button>
+                     <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-semibold hover:bg-violet-700 shadow-md transition-colors opacity-50 cursor-not-allowed">
+                         Add task
+                     </button>
+                 </div>
+  
+             </div>
+          </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-full flex-col bg-white dark:bg-slate-900 relative">
-      {/* Header */}
-      <div className="flex-shrink-0 bg-white dark:bg-slate-800 p-6 border-b border-gray-200 dark:border-slate-700">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <button 
-              onClick={() => setView('board')} 
-              className={`px-4 py-2 text-sm font-semibold transition-colors ${view === 'board' ? 'text-gray-800 dark:text-white' : 'text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-white'}`}
-            >
-              Board
-            </button>
-            <button 
-              onClick={() => setView('list')} 
-              className={`px-4 py-2 text-sm font-semibold transition-colors ${view === 'list' ? 'text-violet-600 border-b-2 border-violet-600' : 'text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-white'}`}
-            >
-              List
-            </button>
-          </div>
+    <div className="flex h-screen bg-white dark:bg-slate-900 overflow-hidden font-sans">
+      {/* SIDEBAR */}
+      <aside className="hidden lg:flex w-64 border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex-col pt-6">
+        <div className="px-6 mb-6">
+           <h3 className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">Categories</h3>
+           <div className="space-y-1">
+              <button onClick={() => { setActiveView("personal"); setSidebarView("categories"); }} className={`w-full flex items-center justify-between px-2 py-2 rounded-md text-sm transition-colors ${activeView === "personal" ? "text-violet-600 font-medium" : "text-gray-600 hover:bg-gray-50 dark:text-gray-400"}`}>
+                 <div className="flex items-center gap-3"><User className="w-4 h-4" /> Personal Tasks</div>
+                 <span className="text-gray-400 text-xs">{tasks.filter(t => t.category === "personal").length}</span>
+              </button>
+              <button onClick={() => { setActiveView("workspace"); setSidebarView("categories"); }} className={`w-full flex items-center justify-between px-2 py-2 rounded-md text-sm transition-colors ${activeView === "workspace" ? "bg-blue-50 text-blue-600 font-medium dark:bg-blue-900/20" : "text-gray-600 hover:bg-gray-50 dark:text-gray-400"}`}>
+                 <div className="flex items-center gap-3"><Briefcase className="w-4 h-4" /> Workspace Tasks</div>
+                 <span className="text-gray-400 text-xs">{tasks.filter(t => t.category === "workspace").length}</span>
+              </button>
+           </div>
         </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex flex-1 overflow-hidden">
-        {view === 'board' ? (
-          <div className="flex-1 overflow-x-auto p-6 md:p-8">
-            <div className="flex space-x-6 min-w-max h-full">
-              {/* To Do Column */}
-              <div className="w-80 flex flex-col h-full bg-gray-100 dark:bg-slate-800/50 rounded-xl p-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-gray-700 dark:text-slate-200 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-violet-500"></span> To Do
-                  </h3>
-                  <span className="bg-white dark:bg-slate-700 px-2 py-0.5 rounded text-xs text-gray-500 dark:text-slate-300">2</span>
-                </div>
-                <div className="space-y-3 overflow-y-auto">
-                  {tasks.todo.map(task => (
-                    <div key={task.id} className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 cursor-pointer hover:shadow-md transition-shadow relative group">
-                      <div className="flex justify-between mb-2">
-                        <span className="px-2 py-0.5 bg-violet-100 text-violet-600 text-xs rounded-full font-medium dark:bg-violet-900/30 dark:text-violet-300">{task.tags[0]}</span>
-                        <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                      </div>
-                      <h4 className="font-semibold text-gray-800 dark:text-white mb-2">{task.title}</h4>
-                      <div className="flex justify-between text-xs text-gray-500 dark:text-slate-400 mt-4 pt-3 border-t border-gray-100 dark:border-slate-700">
-                        <span>{task.date}</span>
-                        <span>{task.checklist}</span>
-                      </div>
-                      <div className="absolute inset-0 bg-white/80 dark:bg-slate-800/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
-                          className="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-violet-700 shadow-md"
-                        >
-                          View
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* On Going Column */}
-              <div className="w-80 flex flex-col h-full bg-gray-100 dark:bg-slate-800/50 rounded-xl p-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-gray-700 dark:text-slate-200 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-yellow-500"></span> On Going
-                  </h3>
-                  <span className="bg-white dark:bg-slate-700 px-2 py-0.5 rounded text-xs text-gray-500 dark:text-slate-300">1</span>
-                </div>
-                <div className="space-y-3 overflow-y-auto">
-                  {tasks.ongoing.map(task => (
-                    <div key={task.id} className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 cursor-pointer hover:shadow-md transition-shadow relative group">
-                      <div className="flex justify-between mb-2">
-                        <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium dark:bg-yellow-900/30 dark:text-yellow-300">{task.tags[0]}</span>
-                        <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                      </div>
-                      <div className="h-20 bg-yellow-50 dark:bg-yellow-900/20 rounded mb-2 flex items-center justify-center text-yellow-700 dark:text-yellow-500 font-bold text-xs">Preview</div>
-                      <h4 className="font-semibold text-gray-800 dark:text-white mb-2">{task.title}</h4>
-                      <div className="flex justify-between text-xs text-red-500 mt-4 pt-3 border-t border-gray-100 dark:border-slate-700">
-                        <span>{task.date}</span>
-                        <span className="text-gray-500 dark:text-slate-400">{task.checklist}</span>
-                      </div>
-                      <div className="absolute inset-0 bg-white/80 dark:bg-slate-800/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
-                          className="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-violet-700 shadow-md"
-                        >
-                          View
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Completed Column */}
-              <div className="w-80 flex flex-col h-full bg-gray-100 dark:bg-slate-800/50 rounded-xl p-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-semibold text-gray-700 dark:text-slate-200 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-500"></span> Completed
-                  </h3>
-                  <span className="bg-white dark:bg-slate-700 px-2 py-0.5 rounded text-xs text-gray-500 dark:text-slate-300">1</span>
-                </div>
-                <div className="space-y-3 overflow-y-auto">
-                  {tasks.completed.map(task => (
-                    <div key={task.id} className="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 opacity-75 relative group">
-                      <div className="flex justify-between mb-2">
-                        <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium dark:bg-green-900/30 dark:text-green-300">{task.tags[0]}</span>
-                        <MoreHorizontal className="w-4 h-4 text-gray-400" />
-                      </div>
-                      <h4 className="font-semibold text-gray-800 dark:text-white mb-2 line-through decoration-gray-400">{task.title}</h4>
-                      <div className="flex justify-between text-xs text-gray-500 dark:text-slate-400 mt-4 pt-3 border-t border-gray-100 dark:border-slate-700">
-                        <span>{task.date}</span>
-                        <span>{task.checklist}</span>
-                      </div>
-                      <div className="absolute inset-0 bg-white/80 dark:bg-slate-800/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); setSelectedTask(task); }}
-                          className="bg-violet-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-violet-700 shadow-md"
-                        >
-                          View
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <div className="px-6 border-t border-gray-100 dark:border-slate-700 pt-6">
+            <h3 className="text-xs font-bold text-gray-400 mb-4 uppercase tracking-wider">Views</h3>
+            <div className="space-y-1">
+               <button onClick={() => setSidebarView("today")} className="w-full flex items-center justify-between px-2 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-slate-800"><div className="flex items-center gap-3"><CalendarIcon className="w-4 h-4" /> Today</div></button>
+               <button onClick={() => setSidebarView("upcoming")} className="w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-slate-800"><ChevronRight className="w-4 h-4" /> Upcoming</button>
+               <button onClick={() => setSidebarView("filters")} className="w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-slate-800"><Filter className="w-4 h-4" /> Filters</button>
+               <button onClick={() => setSidebarView("completed")} className="w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-slate-800"><CheckCircle className="w-4 h-4" /> Completed</button>
             </div>
-          </div>
-        ) : (
-          // LIST VIEW
-          <div className="flex flex-1 h-full">
-            {/* Sidebar */}
-            <div className="w-64 bg-white dark:bg-slate-800 p-6 border-r border-gray-200 dark:border-slate-700 flex-shrink-0 overflow-y-auto">
-              <nav className="flex flex-col space-y-2">
-                {/* Categories Section */}
-                <div className="mb-6">
-                  <h3 className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider px-2 mb-3">Categories</h3>
-                  
-                  <button 
-                    onClick={() => setActiveCategory('personal-content')}
-                    className={`w-full text-left flex items-center space-x-3 p-2 rounded-lg transition-colors ${activeCategory === 'personal-content' ? 'bg-gray-100 dark:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
-                  >
-                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">Personal Tasks</span>
-                    <span className="text-xs text-gray-500 dark:text-slate-400 ml-auto">{personalTasks.length}</span>
-                  </button>
+        </div>
+      </aside>
 
-                  <button 
-                    onClick={() => setActiveCategory('workspace-content')}
-                    className={`w-full text-left flex items-center space-x-3 p-2 rounded-lg transition-colors ${activeCategory === 'workspace-content' ? 'bg-gray-100 dark:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
-                  >
-                    <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5.581m0 0H9m0 0h-.581m.581 0a1 1 0 11-2 0m2 0a1 1 0 10-2 0m-6 0H2m16.581 0a1 1 0 11-2 0m2 0a1 1 0 10-2 0"></path></svg>
-                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">Workspace Tasks</span>
-                    <span className="text-xs text-gray-500 dark:text-slate-400 ml-auto">{workspaceTasks.length}</span>
-                  </button>
-                </div>
+      <main className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900">
+         <div className="lg:hidden p-4 border-b border-gray-200 dark:border-slate-700 flex items-center gap-3">
+             <button onClick={() => setShowLeftSidebar(!showLeftSidebar)} className="p-2 -ml-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-md"><Menu className="w-5 h-5" /></button>
+             <h2 className="text-lg font-bold">Tasks</h2>
+         </div>
 
-                {/* Views Section */}
-                <div className="border-t border-gray-200 dark:border-slate-700 pt-4">
-                  <h3 className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider px-2 mb-3">Views</h3>
-                  
-                  <button 
-                    onClick={() => setActiveCategory('today-content')}
-                    className={`w-full text-left flex items-center space-x-3 p-2 rounded-lg transition-colors ${activeCategory === 'today-content' ? 'bg-gray-100 dark:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
-                  >
-                    <Calendar className="w-5 h-5 text-violet-500" />
-                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">Today</span>
-                    <span className="text-xs text-gray-500 dark:text-slate-400 ml-auto">{today.length}</span>
-                  </button>
-
-                  <button 
-                    onClick={() => setActiveCategory('upcoming-content')}
-                    className={`w-full text-left flex items-center space-x-3 p-2 rounded-lg transition-colors ${activeCategory === 'upcoming-content' ? 'bg-gray-100 dark:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
-                  >
-                    <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
-                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">Upcoming</span>
-                  </button>
-
-                  <button 
-                    onClick={() => setActiveCategory('completed-content')}
-                    className={`w-full text-left flex items-center space-x-3 p-2 rounded-lg transition-colors ${activeCategory === 'completed-content' ? 'bg-gray-100 dark:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-700/50'}`}
-                  >
-                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLineCap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300">Completed</span>
-                  </button>
-                </div>
-              </nav>
-            </div>
-
-            {/* Content Area */}
-            <div className="flex-1 p-8 overflow-y-auto bg-gray-50 dark:bg-slate-900">
-              {/* Personal Tasks */}
-              {activeCategory === 'personal-content' && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Personal Tasks</h2>
-                    <button className="px-3 py-2 bg-blue-500 text-white rounded-lg font-semibold text-sm hover:bg-blue-600 flex items-center space-x-2">
-                      <Plus className="w-4 h-4" />
-                      <span>Create Personal Task</span>
+         <div className="flex-1 flex flex-col h-full">
+             <div className="p-6 flex items-center justify-between">
+                 <div className="flex items-center gap-4">
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{activeView === "personal" ? "Personal Tasks" : "Workspace Tasks"}</h1>
+                    <div className="flex bg-gray-100 dark:bg-slate-800 rounded-lg p-1">
+                        <button onClick={() => setActiveTab('board')} className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeTab === 'board' ? 'bg-white shadow-sm text-gray-800 dark:bg-slate-600 dark:text-white' : 'text-gray-500'}`}>Board</button>
+                        <button onClick={() => setActiveTab('list')} className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${activeTab === 'list' ? 'bg-white shadow-sm text-gray-800 dark:bg-slate-600 dark:text-white' : 'text-gray-500'}`}>List</button>
+                    </div>
+                 </div>
+                 {activeView === 'personal' && (
+                    <button onClick={() => setShowCreateTaskModal(true)} className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors">
+                        <Plus className="w-4 h-4" /> New Task
                     </button>
-                  </div>
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded mb-6">
-                    <p className="text-sm text-blue-800 dark:text-blue-300">These are tasks for your personal productivity. Only you can see and manage these tasks.</p>
-                  </div>
-                  <div className="space-y-3">
-                    {personalTasks.map(task => (
-                      <div key={task.id} className="flex items-start p-3 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 hover:shadow-sm transition-shadow">
-                        <input type="checkbox" className="mt-1 h-4 w-4 text-blue-600 border-gray-300 dark:border-slate-600 rounded" />
-                        <div className="ml-3 flex-1">
-                          <p className="text-sm font-semibold text-gray-800 dark:text-white">{task.title}</p>
-                          <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Due: {task.dueDate}</p>
-                        </div>
-                        <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">{task.category}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                 )}
+             </div>
 
-              {/* Workspace Tasks */}
-              {activeCategory === 'workspace-content' && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Workspace Tasks</h2>
-                  </div>
-                  <div className="bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500 p-4 rounded mb-6">
-                    <p className="text-sm text-orange-800 dark:text-orange-300">These are tasks for your workspace/team projects. You can share and collaborate with team members.</p>
-                  </div>
-                  <div className="space-y-3">
-                    {workspaceTasks.map(task => (
-                      <div key={task.id} className="flex items-start p-3 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 hover:shadow-sm transition-shadow">
-                        <input type="checkbox" className="mt-1 h-4 w-4 text-orange-600 border-gray-300 dark:border-slate-600 rounded" />
-                        <div className="ml-3 flex-1">
-                          <p className="text-sm font-semibold text-gray-800 dark:text-white">{task.title}</p>
-                          <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">Due: {task.dueDate}</p>
-                        </div>
-                        <span className="text-xs px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full">{task.category}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+             <div className="flex-1 overflow-y-auto px-6 pb-6">
+                
 
-              {/* Today */}
-              {activeCategory === 'today-content' && (
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Today</h2>
-                  
-                  <div className="mb-8 relative">
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300">Overdue</h3>
-                      <button 
-                        onClick={() => setShowReschedulePopup(!showReschedulePopup)}
-                        className="text-sm font-medium text-red-600 dark:text-red-400 hover:underline"
-                      >
-                        Reschedule
-                      </button>
-                    </div>
-                    
-                    {showReschedulePopup && (
-                      <div className="absolute right-0 top-8 z-10 w-72 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 p-4">
-                        <div className="space-y-2 mb-4">
-                          <button className="flex items-center justify-between w-full p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700">
-                            <div className="flex items-center space-x-2">
-                              <Calendar className="w-5 h-5 text-green-500" />
-                              <span className="text-sm text-gray-700 dark:text-slate-300">Today</span>
+                
+                {activeView === 'workspace' && activeTab === 'list' && <h3 className="text-xs font-bold text-gray-400 uppercase mb-3">Active Tasks</h3>}
+
+                {activeTab === 'board' ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {activeView === 'workspace' && pendingTasks.length > 0 && (
+                            <div className="bg-orange-50/50 dark:bg-orange-900/5 rounded-xl p-4 border border-orange-100 dark:border-orange-900/20">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Shield className="w-4 h-4 text-orange-500" />
+                                    <h3 className="font-semibold text-orange-700 dark:text-orange-400">Pending Review</h3>
+                                </div>
+                                <div className="space-y-3">{pendingTasks.map(task => <BoardTaskCard key={task.id} task={task} onClick={setSelectedTask} />)}</div>
                             </div>
-                            <span className="text-sm text-gray-500 dark:text-slate-400">Tue</span>
-                          </button>
-                          <button className="flex items-center justify-between w-full p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700">
-                            <div className="flex items-center space-x-2">
-                              <svg className="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                              <span className="text-sm text-gray-700 dark:text-slate-300">Tomorrow</span>
-                            </div>
-                            <span className="text-sm text-gray-500 dark:text-slate-400">Wed</span>
-                          </button>
-                          <button className="flex items-center justify-between w-full p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700">
-                            <div className="flex items-center space-x-2">
-                              <Repeat className="w-5 h-5 text-purple-500" />
-                              <span className="text-sm text-gray-700 dark:text-slate-300">This weekend</span>
-                            </div>
-                            <span className="text-sm text-gray-500 dark:text-slate-400">Sat</span>
-                          </button>
+                        )}
+                        <div>
+                            <div className="flex items-center gap-2 mb-4"><div className="w-2.5 h-2.5 rounded-full bg-violet-500"></div><h3 className="font-semibold text-gray-700 dark:text-gray-200">To Do</h3></div>
+                            <div className="space-y-3">{filterByStatus("todo").map(task => <BoardTaskCard key={task.id} task={task} onClick={setSelectedTask} />)}</div>
                         </div>
-                        <div className="flex space-x-2 pt-2 border-t border-gray-100 dark:border-slate-700">
-                          <button className="flex-1 p-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 text-sm rounded-md hover:bg-gray-200 dark:hover:bg-slate-600">Time</button>
-                          <button className="flex-1 p-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 text-sm rounded-md hover:bg-gray-200 dark:hover:bg-slate-600">Repeat</button>
+                        <div>
+                            <div className="flex items-center gap-2 mb-4"><div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div><h3 className="font-semibold text-gray-700 dark:text-gray-200">On Going</h3></div>
+                            <div className="space-y-3">{filterByStatus("ongoing").map(task => <BoardTaskCard key={task.id} task={task} onClick={setSelectedTask} />)}</div>
                         </div>
-                      </div>
-                    )}
-                    
-                    <div className="space-y-3">
-                      {today.filter(t => t.overdue).map(task => (
-                        <div key={task.id} className="flex items-start p-2 border-b border-gray-200 dark:border-slate-700">
-                          <input type="checkbox" className="mt-1 h-4 w-4 text-red-600 border-gray-300 dark:border-slate-600 rounded" />
-                          <div className="ml-3 flex-1">
-                            <p className="text-sm text-gray-800 dark:text-white">{task.title}</p>
-                            <p className="text-xs text-red-600 dark:text-red-400">Yesterday</p>
-                          </div>
-                          <span className="text-xs text-gray-500 dark:text-slate-400">{task.workspace}</span>
+                        <div>
+                            <div className="flex items-center gap-2 mb-4"><CheckCircle className="w-4 h-4 text-emerald-500" /><h3 className="font-semibold text-gray-700 dark:text-gray-200">Completed</h3></div>
+                            <div className="space-y-3 opacity-70">{filterByStatus("completed").map(task => <BoardTaskCard key={task.id} task={task} onClick={setSelectedTask} />)}</div>
                         </div>
-                      ))}
                     </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">7 Dec - Today</h3>
-                    <div className="space-y-3">
-                      {today.filter(t => !t.overdue).map(task => (
-                        <div key={task.id} className="flex items-start p-2 border-b border-gray-200 dark:border-slate-700">
-                          <input type="checkbox" className="mt-1 h-4 w-4 text-violet-600 border-gray-300 dark:border-slate-600 rounded" />
-                          <div className="ml-3 flex-1">
-                            <p className="text-sm text-gray-800 dark:text-white">{task.title}</p>
-                            {(task as any).description && <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{(task as any).description}</p>}
-                          </div>
-                          <span className="text-xs text-gray-500 dark:text-slate-400">{task.workspace}</span>
-                        </div>
-                      ))}
+                ) : (
+                    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+                         {filterByStatus("todo").concat(filterByStatus("ongoing")).concat(filterByStatus("completed")).length > 0 ? 
+                            filterByStatus("todo").concat(filterByStatus("ongoing")).concat(filterByStatus("completed")).map(task => <ListTaskItem key={task.id} task={task} onClick={setSelectedTask} />) 
+                            : <div className="p-8 text-center text-gray-400">No active tasks found.</div>
+                         }
                     </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Upcoming */}
-              {activeCategory === 'upcoming-content' && (
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Upcoming</h2>
-                  <div className="space-y-4">
-                    {upcomingTasks.map(task => (
-                      <div key={task.id}>
-                        <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">{task.date}</h3>
-                        <div className="flex items-start p-2 border-b border-gray-200 dark:border-slate-700">
-                          <input type="checkbox" className="mt-1 h-4 w-4 text-gray-500 border-gray-300 dark:border-slate-600 rounded" />
-                          <div className="ml-3 flex-1">
-                            <p className="text-sm text-gray-800 dark:text-white">{task.title}</p>
-                          </div>
-                          <span className="text-xs text-gray-500 dark:text-slate-400">{task.workspace}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Completed */}
-              {activeCategory === 'completed-content' && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Activity: All projects</h2>
-                    <div className="flex space-x-2">
-                      <button className="text-sm text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700">Everyone</button>
-                      <button className="text-sm text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-white p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700">Completed tasks</button>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">15 Nov - Saturday</h3>
-                      <div className="flex items-center p-2 border-b border-gray-200 dark:border-slate-700">
-                        <img src="https://i.pravatar.cc/100?img=5" alt="avatar" className="w-8 h-8 rounded-full" />
-                        <div className="ml-3 flex-1">
-                          <p className="text-sm text-gray-800 dark:text-white"><b>Peter Parker</b> completed a task: <span className="font-medium">Prototype for Usability Testing</span></p>
-                          <p className="text-xs text-gray-500 dark:text-slate-400">11:30 AM</p>
-                        </div>
-                        <span className="text-xs text-gray-500 dark:text-slate-400">Capstone 101</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* TASK DETAILS MODAL */}
-      {selectedTask && (
-        <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
-          <div 
-            className="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm"
-            onClick={() => setSelectedTask(null)}
-          ></div>
-
-          <div className="flex min-h-full items-center justify-center p-4">
-            <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-lg dark:bg-slate-800">
-              
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-slate-700">
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-6 bg-violet-600 rounded-full"></div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">{selectedTask.title}</h3>
-                </div>
-                <button 
-                  onClick={() => setSelectedTask(null)}
-                  className="text-gray-400 hover:text-gray-500 focus:outline-none"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="p-6 space-y-6">
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">STATUS</p>
-                    <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 dark:bg-blue-900/30 dark:text-blue-300">
-                      {selectedTask.status || 'In Progress'}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">PRIORITY</p>
-                    <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10 dark:bg-red-900/30 dark:text-red-300">
-                      {selectedTask.priority || 'High Priority'}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">DUE DATE</p>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">11/20/2025</p>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">WORKSPACE</p>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{selectedTask.workspace || 'Capstone 101'}</p>
-                </div>
-
-                <div>
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">DESCRIPTION</p>
-                  <div className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg text-sm text-gray-600 dark:text-slate-300 leading-relaxed">
-                    {selectedTask.description || 'No description provided for this task.'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Footer Actions */}
-              <div className="p-6 bg-gray-50 dark:bg-slate-700/30 flex justify-between items-center border-t border-gray-100 dark:border-slate-700">
-                <button className="text-violet-600 text-sm font-semibold hover:text-violet-700">View all details</button>
-                <div className="flex gap-2">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-semibold hover:bg-violet-700 transition-colors">
-                    <Play className="w-4 h-4 fill-current" /> Play
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-semibold hover:bg-violet-700 transition-colors">
-                    <Square className="w-4 h-4 fill-current" /> Stop
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+                )}
+             </div>
+         </div>
+      </main>
+      {selectedTask && <TaskDetailModal />}
+      {showCreateTaskModal && <CreateTaskModal />}
     </div>
   );
 };

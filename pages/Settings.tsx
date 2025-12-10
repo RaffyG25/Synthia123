@@ -14,11 +14,6 @@ const Settings: React.FC = () => {
   // Tabs configuration based on your screenshots
   const tabs = [
     { id: 'general', label: 'General' },
-    { id: 'org-structure', label: 'Org Structure' },
-    { id: 'approval-chains', label: 'Approval Chains' },
-    { id: 'audit-logs', label: 'Audit Logs' },
-    { id: 'roles-permissions', label: 'Roles & Permissions' },
-    { id: 'user-roles', label: 'User Roles' },
   ];
 
   // --- RENDER CONTENT BASED ON TAB ---
@@ -45,28 +40,11 @@ const Settings: React.FC = () => {
             </div>
 
             {/* Organization Section */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Organization</h3>
-              <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-200 dark:border-slate-700 flex items-center justify-between shadow-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Organization Settings</p>
-                  <p className="text-sm text-gray-500 dark:text-slate-400">Manage organization configuration and branding</p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </div>
-            </div>
+            
 
             {/* Workspace Section */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Workspace</h3>
-              <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-200 dark:border-slate-700 flex items-center justify-between shadow-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">Invitations</p>
-                  <p className="text-sm text-gray-500 dark:text-slate-400">Manage workspace invitations and shareable links</p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </div>
-            </div>
+
+            
           </div>
         );
 
