@@ -68,10 +68,6 @@ const Tasks: React.FC = () => {
               List
             </button>
           </div>
-          <button className="px-4 py-2 bg-violet-600 text-white rounded-lg font-semibold text-sm hover:bg-violet-700 flex items-center space-x-2">
-            <Plus className="w-5 h-5" />
-            <span>New Task</span>
-          </button>
         </div>
       </div>
 
@@ -277,10 +273,6 @@ const Tasks: React.FC = () => {
                 <div>
                   <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Workspace Tasks</h2>
-                    <button className="px-3 py-2 bg-orange-500 text-white rounded-lg font-semibold text-sm hover:bg-orange-600 flex items-center space-x-2">
-                      <Plus className="w-4 h-4" />
-                      <span>Create Workspace Task</span>
-                    </button>
                   </div>
                   <div className="bg-orange-50 dark:bg-orange-900/20 border-l-4 border-orange-500 p-4 rounded mb-6">
                     <p className="text-sm text-orange-800 dark:text-orange-300">These are tasks for your workspace/team projects. You can share and collaborate with team members.</p>

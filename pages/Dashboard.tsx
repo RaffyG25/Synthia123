@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckSquare, Users, Video, ArrowRight, X } from 'lucide-react';
+import { CheckSquare, Users, Video, ArrowRight, X, AlertCircle } from 'lucide-react';
 
 interface Task {
   id: number;
@@ -16,13 +16,6 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [showBriefing, setShowBriefing] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [currentMonth, setCurrentMonth] = useState(new Date(2025, 11)); // December 2025
-
-  const handleDateClick = (day: number) => {
-    const selectedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-    const dateString = selectedDate.toISOString().split('T')[0];
-    navigate(`/calendar?date=${dateString}`);
-  };
 
   const tasks: Task[] = [
     {
@@ -93,8 +86,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="p-6 md:p-8 bg-gray-100 dark:bg-slate-900 min-h-full">
-      {/*<div className="mb-6">
-      </div>*/}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column */}
@@ -177,19 +168,19 @@ const Dashboard: React.FC = () => {
                   {tasks.map((task) => (
                     <tr key={task.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
                       <td className="px-6 py-4 text-gray-800 font-medium dark:text-white">{task.title}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(task.status)}`}>
                           {task.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-gray-600 dark:text-slate-400">{task.workspace}</td>
-                      <td className="px-6 py-4 text-gray-600 dark:text-slate-400">{task.dueDate}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 text-gray-600 dark:text-slate-400 whitespace-nowrap">{task.workspace}</td>
+                      <td className="px-6 py-4 text-gray-600 dark:text-slate-400 whitespace-nowrap">{task.dueDate}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getPriorityColor(task.priority)}`}>
                           {task.priority}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <button 
                           onClick={() => setSelectedTask(task)}
                           className="px-4 py-1.5 bg-violet-600 text-white text-xs font-medium rounded-md hover:bg-violet-700 transition-colors shadow-sm"
@@ -206,84 +197,128 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Right Column */}
-        <div className="space-y-6">
-          {/* Calendar Widget */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 dark:bg-slate-800 dark:border-slate-700">
-            <div className="flex items-center justify-between mb-6">
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full text-gray-400 hover:text-gray-600 dark:text-slate-400 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        <div className="space-y-4">
+          {/* Calendar Widget - COMPACT VERSION */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 dark:bg-slate-800 dark:border-slate-700">
+            <div className="flex items-center justify-between mb-2">
+              <button className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full text-gray-400 hover:text-gray-600 dark:text-slate-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
               </button>
-              <h3 className="text-base font-bold text-gray-800 dark:text-white">December 2025</h3>
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full text-gray-400 hover:text-gray-600 dark:text-slate-400 transition-colors">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              <h3 className="text-sm font-bold text-gray-800 dark:text-white">December 2025</h3>
+              <button className="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full text-gray-400 hover:text-gray-600 dark:text-slate-400 transition-colors">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
               </button>
             </div>
             
-            <div className="grid grid-cols-7 text-center mb-4">
+            <div className="grid grid-cols-7 text-center mb-1">
               {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-                <div key={d} className="text-xs font-medium text-gray-400 dark:text-slate-500 py-1">{d}</div>
+                <div key={d} className="text-[10px] font-medium text-gray-400 dark:text-slate-500 py-1">{d}</div>
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-y-4 gap-x-2 text-center text-sm">
+            <div className="grid grid-cols-7 gap-y-1 gap-x-1 text-center text-xs">
               {/* Prev Month */}
-              <div className="py-2 text-gray-300 dark:text-slate-600">30</div>
+              <div className="py-1.5 text-gray-300 dark:text-slate-600">30</div>
               
               {/* Days 1-3 */}
-              <div onClick={() => handleDateClick(1)} className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">1</div>
-              <div onClick={() => handleDateClick(2)} className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">2</div>
-              <div onClick={() => handleDateClick(3)} className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">3</div>
+              <div className="py-1.5 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg">1</div>
+              <div className="py-1.5 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg">2</div>
+              <div className="py-1.5 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg">3</div>
               
               {/* Selected Day 4 */}
-              <div onClick={() => handleDateClick(4)} className="relative cursor-pointer">
-                  <div className="absolute inset-0 bg-violet-600 rounded-lg shadow-sm shadow-violet-200 dark:shadow-none"></div>
-                  <div className="relative py-2 text-white font-bold">4</div>
+              <div className="relative">
+                  <div className="absolute inset-0 bg-violet-600 rounded-md shadow-sm shadow-violet-200 dark:shadow-none"></div>
+                  <div className="relative py-1.5 text-white font-bold cursor-pointer">4</div>
               </div>
 
               {/* Days 5-31 */}
               {[...Array(27)].map((_, i) => (
-                 <div key={i + 5} onClick={() => handleDateClick(i + 5)} className="py-2 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">{i + 5}</div>
+                 <div key={i + 5} className="py-1.5 text-gray-700 dark:text-slate-300 font-medium cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg">{i + 5}</div>
               ))}
               
               {/* Next Month */}
-              <div className="py-2 text-gray-300 dark:text-slate-600">1</div>
-              <div className="py-2 text-gray-300 dark:text-slate-600">2</div>
-              <div className="py-2 text-gray-300 dark:text-slate-600">3</div>
+              <div className="py-1.5 text-gray-300 dark:text-slate-600">1</div>
+              <div className="py-1.5 text-gray-300 dark:text-slate-600">2</div>
+              <div className="py-1.5 text-gray-300 dark:text-slate-600">3</div>
             </div>
           </div>
 
-          {/* Schedule Widget */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 dark:bg-slate-800 dark:border-slate-700">
-            <div className="mb-6">
-              <h3 className="text-base font-bold text-gray-800 dark:text-white">Schedule</h3>
-              <p className="text-xs text-gray-500 mt-1 dark:text-slate-400">Today - November 18, 2025</p>
+          {/* Schedule Widget - COMPACTED */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 dark:bg-slate-800 dark:border-slate-700">
+            <div className="mb-4">
+              <h3 className="text-sm font-bold text-gray-800 dark:text-white">Schedule</h3>
+              <p className="text-[10px] text-gray-500 mt-1 dark:text-slate-400">Today - November 18, 2025</p>
             </div>
             
-            <div className="flex flex-col space-y-4">
-              <div className="flex gap-4 pb-3 border-b border-gray-100 last:border-0 dark:border-slate-700">
-                <div className="w-12 flex-shrink-0 pt-1">
-                  <p className="text-sm font-bold text-violet-600 dark:text-violet-400">9:00</p>
+            <div className="flex flex-col space-y-3">
+              <div className="flex gap-3 pb-2 border-b border-gray-100 last:border-0 dark:border-slate-700">
+                <div className="w-10 flex-shrink-0 pt-0.5">
+                  <p className="text-xs font-bold text-violet-600 dark:text-violet-400">9:00</p>
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-gray-800 dark:text-white">Monthly Meeting</p>
-                  <p className="text-xs text-gray-500 mt-0.5 dark:text-slate-400">Capstone 101 Workspace</p>
+                  <p className="text-xs font-bold text-gray-800 dark:text-white">Monthly Meeting</p>
+                  <p className="text-[10px] text-gray-500 mt-0.5 dark:text-slate-400">Capstone 101 Workspace</p>
                 </div>
               </div>
-              <div className="flex gap-4 pb-3 border-b border-gray-100 last:border-0 dark:border-slate-700">
-                <div className="w-12 flex-shrink-0 pt-1">
-                  <p className="text-sm font-bold text-violet-600 dark:text-violet-400">10:00</p>
+              <div className="flex gap-3 pb-2 border-b border-gray-100 last:border-0 dark:border-slate-700">
+                <div className="w-10 flex-shrink-0 pt-0.5">
+                  <p className="text-xs font-bold text-violet-600 dark:text-violet-400">10:00</p>
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-gray-800 dark:text-white">Design Sync</p>
-                  <p className="text-xs text-gray-500 mt-0.5 dark:text-slate-400">Internal Tools</p>
+                  <p className="text-xs font-bold text-gray-800 dark:text-white">Design Sync</p>
+                  <p className="text-[10px] text-gray-500 mt-0.5 dark:text-slate-400">Internal Tools</p>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Missed Meetings Widget - COMPACTED */}
+          <div className="bg-white rounded-xl shadow-sm border border-red-200 p-4 dark:bg-slate-800 dark:border-red-900/50 relative overflow-hidden">
+            {/* Red Accent Strip */}
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
+            
+            <div className="mb-3 pl-2 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                   Missed Meetings
+                </h3>
+                <p className="text-[10px] text-red-500 mt-0.5 font-semibold flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3"/> Action Required
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col space-y-3 pl-2">
+                <div className="flex flex-col gap-2 pb-2 border-b border-gray-100 last:border-0 dark:border-slate-700">
+                   <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-xs font-bold text-gray-800 dark:text-white">Project Alpha Sync</p>
+                        <p className="text-[10px] text-gray-500 mt-0.5 dark:text-slate-400">Yesterday, 2:00 PM</p>
+                      </div>
+                   </div>
+                   <button onClick={() => navigate('/meeting-summary')} className="text-[10px] w-full bg-red-50 text-red-600 py-1 rounded border border-red-100 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800 transition-colors font-medium">
+                       View Summary
+                   </button>
+                </div>
+
+                <div className="flex flex-col gap-2 pb-2 border-b border-gray-100 last:border-0 dark:border-slate-700">
+                   <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-xs font-bold text-gray-800 dark:text-white">Client Onboarding</p>
+                        <p className="text-[10px] text-gray-500 mt-0.5 dark:text-slate-400">Nov 16, 11:00 AM</p>
+                      </div>
+                   </div>
+                   <button onClick={() => navigate('/meeting-summary')} className="text-[10px] w-full bg-red-50 text-red-600 py-1 rounded border border-red-100 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800 transition-colors font-medium">
+                       View Summary
+                   </button>
+                </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {/* Briefing Modal */}
+      {/* Briefing Modal - FIXED */}
       {showBriefing && (
         <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
           {/* Backdrop */}
@@ -295,12 +330,15 @@ const Dashboard: React.FC = () => {
           <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
             <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 w-full max-w-3xl dark:bg-slate-800 border border-transparent dark:border-slate-700">
                 
-                {/* Purple Accent Strip */}
-                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-violet-600"></div>
+                {/* REMOVED: Absolute full-height purple accent strip */}
 
                 <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pl-8 dark:bg-slate-800">
                     <div className="flex items-start justify-between mb-5">
-                        <h3 className="text-lg font-bold leading-6 text-gray-900 dark:text-white" id="modal-title">Planning for the Synergy 2025</h3>
+                        <div className="flex items-center gap-3">
+                             {/* ADDED: Small purple accent pill next to title */}
+                             <span className="w-1.5 h-6 bg-violet-600 rounded-full flex-shrink-0"></span>
+                             <h3 className="text-lg font-bold leading-6 text-gray-900 dark:text-white" id="modal-title">Planning for the Synergy 2025</h3>
+                        </div>
                         <button 
                             type="button" 
                             className="rounded-md bg-white dark:bg-slate-800 text-gray-400 hover:text-gray-500 focus:outline-none"

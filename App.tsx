@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -19,6 +21,7 @@ import MeetingSummaryDetail from './pages/MeetingSummaryDetail';
 import Space from './pages/Space';
 import Video from './pages/Video';
 import Recording from './pages/Recording';
+import Settings from './pages/Settings';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -35,8 +38,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isWorkspace = location.pathname.startsWith('/workspace');
   const isSpace = location.pathname.startsWith('/space');
   const isVideo = location.pathname === '/video';
+  const isRecording = location.pathname === '/recording';
 
-  if (isLanding || isMeetingRoom || isVideo || isLogin) {
+  if (isLanding || isMeetingRoom || isVideo || isLogin || isRecording) {
     return <>{children}</>;
   }
 
@@ -106,6 +110,7 @@ const App: React.FC = () => {
           <Route path="/meeting-history" element={<MeetingHistory />} />
           <Route path="/meeting-summary" element={<MeetingSummary />} />
           <Route path="/meeting-summary/:id" element={<MeetingSummaryDetail />} />
+          <Route path="/settings" element={<Settings/>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

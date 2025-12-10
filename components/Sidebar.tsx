@@ -79,10 +79,21 @@ const Sidebar: React.FC = () => {
             <User className="w-5 h-5" />
             <span>Profile</span>
           </NavLink>
-          <a href="#" className="flex items-center space-x-3 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200">
+          
+          <NavLink
+            to="/settings"
+            className={({ isActive }) =>
+              `flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${
+                isActive
+                  ? 'bg-violet-600 text-white shadow-md shadow-violet-200 dark:shadow-none'
+                  : 'text-gray-600 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200'
+              }`
+            }
+          >
             <Settings className="w-5 h-5" />
             <span>Settings</span>
-          </a>
+         </NavLink>
+          
         </nav>
       </div>
 
