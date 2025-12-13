@@ -56,7 +56,7 @@ const Recording: React.FC = () => {
                     <Pause className="w-6 h-6" />
                   </button>
                   
-                  <button className="p-4 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-colors">
+                  <button onClick={() => navigate('/meeting-summary')} className="p-4 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg transition-colors">
                     <Square className="w-8 h-8 fill-white" />
                   </button>
                   
